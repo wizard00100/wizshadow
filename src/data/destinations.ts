@@ -548,26 +548,6 @@ export const destinations: Destination[] = [
       "Ancient Rakata AI may still be active"
     ],
     requiredRank: "Darth"
-  },
-  {
-    id: "ilum-crystal-heart",
-    name: "Ilum Crystal Heart",
-    description: "Core of the galaxy's kyber crystals",
-    backgroundLore: "The sacred Jedi world, now strip-mined for its kyber crystals. The planet's core has been converted into a spectacular crystal palace where dark side energy flows through every surface.",
-    adventureLevel: 7,
-    dangerLevel: 6,
-    gravityLevel: 0.6,
-    price: "6,800 Imperial Credits",
-    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80",
-    keywords: ["ilum", "crystal", "heart", "kyber", "jedi", "core"],
-    ratings: { average: 4.6, count: 45 },
-    reviews: [],
-    survivalNotes: [
-      "Kyber crystals respond to Force users",
-      "Planet's core is unstable",
-      "Jedi spirits haunt the crystal caves"
-    ],
-    requiredRank: "Lord"
   }
 ];
 
