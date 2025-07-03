@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,15 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Sith theme colors
+				sith: {
+					black: '#0a0a0a',
+					gray: '#1a1a1a',
+					'gray-light': '#2a2a2a',
+					red: '#dc2626',
+					'red-light': '#ef4444',
+					'red-glow': '#fecaca',
 				}
 			},
 			borderRadius: {
@@ -84,11 +94,39 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'glow-pulse': {
+					'0%, 100%': {
+						boxShadow: '0 0 5px theme(colors.sith.red), 0 0 10px theme(colors.sith.red), 0 0 15px theme(colors.sith.red)'
+					},
+					'50%': {
+						boxShadow: '0 0 10px theme(colors.sith.red), 0 0 20px theme(colors.sith.red), 0 0 30px theme(colors.sith.red)'
+					}
+				},
+				'red-flicker': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.8' }
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0px)' },
+					'50%': { transform: 'translateY(-10px)' }
+				},
+				'slide-up': {
+					'0%': { transform: 'translateY(100px)', opacity: '0' },
+					'100%': { transform: 'translateY(0px)', opacity: '1' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
+				'red-flicker': 'red-flicker 3s ease-in-out infinite',
+				'float': 'float 6s ease-in-out infinite',
+				'slide-up': 'slide-up 0.6s ease-out'
+			},
+			backgroundImage: {
+				'sith-gradient': 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2a2a2a 100%)',
+				'red-gradient': 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
 			}
 		}
 	},
