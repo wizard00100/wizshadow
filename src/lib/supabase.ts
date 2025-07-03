@@ -23,7 +23,7 @@ export const signUp = async (email: string, password: string, fullName: string) 
     options: {
       data: {
         full_name: fullName,
-        rank: 'Sith Acolyte'
+        rank: 'Acolyte'
       }
     }
   })
