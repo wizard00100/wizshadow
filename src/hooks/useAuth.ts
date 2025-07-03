@@ -7,51 +7,76 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Get initial session
+    let mounted = true;
+
+    // Get initial session with timeout
     const getInitialSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession()
+        console.log('Getting initial session...')
+        
+        // Set a timeout to prevent infinite loading
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Session timeout')), 10000)
+        );
+        
+        const sessionPromise = supabase.auth.getSession();
+        
+        const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]) as any;
+        
+        if (!mounted) return;
+        
+        console.log('Session retrieved:', session ? 'Found' : 'None')
         
         // Check for local subscription data and update user metadata if needed
         if (session?.user) {
           const localSubscription = localStorage.getItem('sith-subscription');
           if (localSubscription) {
-            const subData = JSON.parse(localSubscription);
-            
-            // Update user metadata if rank has changed
-            if (session.user.user_metadata?.rank !== subData.tier) {
-              const { error } = await supabase.auth.updateUser({
-                data: {
-                  ...session.user.user_metadata,
-                  rank: subData.tier,
-                  subscription_tier: subData.tier.toLowerCase(),
-                  subscription_type: subData.plan,
-                  subscription_start: subData.startDate,
-                  subscription_end: subData.endDate
-                }
-              });
+            try {
+              const subData = JSON.parse(localSubscription);
               
-              if (!error) {
-                // Refresh session to get updated user data
-                const { data: { session: updatedSession } } = await supabase.auth.getSession();
-                setUser(updatedSession?.user ?? null);
-              } else {
+              // Update user metadata if rank has changed
+              if (session.user.user_metadata?.rank !== subData.tier) {
+                const { error } = await supabase.auth.updateUser({
+                  data: {
+                    ...session.user.user_metadata,
+                    rank: subData.tier,
+                    subscription_tier: subData.tier.toLowerCase(),
+                    subscription_type: subData.plan,
+                    subscription_start: subData.startDate,
+                    subscription_end: subData.endDate
+                  }
+                });
+                
+                if (!error && mounted) {
+                  // Refresh session to get updated user data
+                  const { data: { session: updatedSession } } = await supabase.auth.getSession();
+                  setUser(updatedSession?.user ?? null);
+                } else if (mounted) {
+                  setUser(session.user);
+                }
+              } else if (mounted) {
                 setUser(session.user);
               }
-            } else {
-              setUser(session.user);
+            } catch (e) {
+              console.error('Error parsing local subscription:', e);
+              if (mounted) setUser(session.user);
             }
-          } else {
+          } else if (mounted) {
             setUser(session.user);
           }
-        } else {
+        } else if (mounted) {
           setUser(null);
         }
       } catch (error) {
         console.error('Error getting initial session:', error);
-        setUser(null);
+        if (mounted) {
+          setUser(null);
+        }
       } finally {
-        setLoading(false);
+        if (mounted) {
+          console.log('Setting loading to false')
+          setLoading(false);
+        }
       }
     }
 
@@ -60,52 +85,70 @@ export const useAuth = () => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
+        console.log('Auth state changed:', event, session ? 'Session exists' : 'No session')
+        
         try {
           if (event === 'SIGNED_IN' && session?.user) {
             // Check for local subscription data on sign in
             const localSubscription = localStorage.getItem('sith-subscription');
             if (localSubscription) {
-              const subData = JSON.parse(localSubscription);
-              
-              // Update user metadata with subscription info
-              const { error } = await supabase.auth.updateUser({
-                data: {
-                  ...session.user.user_metadata,
-                  rank: subData.tier,
-                  subscription_tier: subData.tier.toLowerCase(),
-                  subscription_type: subData.plan,
-                  subscription_start: subData.startDate,
-                  subscription_end: subData.endDate
+              try {
+                const subData = JSON.parse(localSubscription);
+                
+                // Update user metadata with subscription info
+                const { error } = await supabase.auth.updateUser({
+                  data: {
+                    ...session.user.user_metadata,
+                    rank: subData.tier,
+                    subscription_tier: subData.tier.toLowerCase(),
+                    subscription_type: subData.plan,
+                    subscription_start: subData.startDate,
+                    subscription_end: subData.endDate
+                  }
+                });
+                
+                if (!error && mounted) {
+                  // Refresh session to get updated user data
+                  const { data: { session: updatedSession } } = await supabase.auth.getSession();
+                  setUser(updatedSession?.user ?? null);
+                } else if (mounted) {
+                  setUser(session.user);
                 }
-              });
-              
-              if (!error) {
-                // Refresh session to get updated user data
-                const { data: { session: updatedSession } } = await supabase.auth.getSession();
-                setUser(updatedSession?.user ?? null);
-              } else {
-                setUser(session.user);
+              } catch (e) {
+                console.error('Error parsing local subscription on sign in:', e);
+                if (mounted) setUser(session.user);
               }
-            } else {
+            } else if (mounted) {
               setUser(session.user);
             }
           } else if (event === 'SIGNED_OUT') {
-            setUser(null);
-            // Clear local subscription data on sign out
-            localStorage.removeItem('sith-subscription');
-          } else {
+            if (mounted) {
+              setUser(null);
+              // Clear local subscription data on sign out
+              localStorage.removeItem('sith-subscription');
+            }
+          } else if (mounted) {
             setUser(session?.user ?? null);
           }
         } catch (error) {
           console.error('Error in auth state change:', error);
-          setUser(session?.user ?? null);
+          if (mounted) {
+            setUser(session?.user ?? null);
+          }
         } finally {
-          setLoading(false);
+          if (mounted) {
+            setLoading(false);
+          }
         }
       }
     )
 
-    return () => subscription.unsubscribe()
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    }
   }, [])
 
   return { user, loading }

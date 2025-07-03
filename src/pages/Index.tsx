@@ -132,12 +132,15 @@ const Index = () => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
+  // Show a simpler loading screen with timeout fallback
   if (loading) {
     return (
       <div className="min-h-screen bg-sith-black flex items-center justify-center">
-        <div className="text-center">
+        <StarField />
+        <div className="relative z-10 text-center">
           <div className="w-16 h-16 border-4 border-sith-red border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-sith-red text-lg title-font">AWAKENING THE FORCE...</p>
+          <p className="text-gray-400 text-sm mt-2 font-exo">Connecting to the Empire's network...</p>
         </div>
       </div>
     );
