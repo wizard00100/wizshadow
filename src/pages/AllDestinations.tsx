@@ -167,8 +167,8 @@ const AllDestinations = () => {
                 <SelectItem value="all">All Destinations</SelectItem>
                 <SelectItem value="high-adventure">High Adventure (8+)</SelectItem>
                 <SelectItem value="high-danger">High Danger (8+)</SelectItem>
-                <SelectItem value="low-gravity">Low Gravity (<0.8G)</SelectItem>
-                <SelectItem value="high-gravity">High Gravity (>1.5G)</SelectItem>
+                <SelectItem value="low-gravity">Low Gravity (&lt;0.8G)</SelectItem>
+                <SelectItem value="high-gravity">High Gravity (&gt;1.5G)</SelectItem>
                 <SelectItem value="top-rated">Top Rated (4.5+)</SelectItem>
               </SelectContent>
             </Select>
