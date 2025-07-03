@@ -14,9 +14,9 @@ export const useAuth = () => {
       try {
         console.log('Getting initial session...')
         
-        // Set a timeout to prevent infinite loading - increased to 60 seconds
+        // Set a timeout to prevent infinite loading - increased to 2 minutes
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Session timeout')), 60000)
+          setTimeout(() => reject(new Error('Session timeout')), 120000)
         );
         
         const sessionPromise = supabase.auth.getSession();
