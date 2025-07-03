@@ -58,7 +58,16 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       const { data, error } = await signIn(signInData.email, signInData.password);
       
       if (error) {
-        toast.error('The dark side rejects your credentials. Try again.');
+        // Handle specific error cases
+        if (error.message === 'Invalid login credentials') {
+          toast.error('Invalid email or password. Please double-check your credentials and ensure your email is verified if you recently signed up.');
+        } else if (error.message.includes('Email not confirmed')) {
+          toast.error('Please check your email and click the verification link before signing in.');
+        } else if (error.message.includes('Too many requests')) {
+          toast.error('Too many login attempts. Please wait a moment before trying again.');
+        } else {
+          toast.error(`Authentication failed: ${error.message}`);
+        }
         return;
       }
 
@@ -68,7 +77,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         setSignInData({ email: '', password: '' });
       }
     } catch (error) {
-      toast.error('The Force disturbance prevents your entry.');
+      console.error('Sign in error:', error);
+      toast.error('The Force disturbance prevents your entry. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -147,7 +157,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       const { data, error } = await signUp(signUpData.email, signUpData.password, signUpData.name);
       
       if (error) {
-        toast.error('The dark side rejects your offering. Try again.');
+        if (error.message.includes('already registered')) {
+          toast.error('This email is already registered. Try signing in instead.');
+        } else if (error.message.includes('Password should be')) {
+          toast.error('Password does not meet requirements. Please choose a stronger password.');
+        } else {
+          toast.error(`Registration failed: ${error.message}`);
+        }
         return;
       }
 
@@ -159,6 +175,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         setShowOtpVerification(false);
       }
     } catch (error) {
+      console.error('Sign up error:', error);
       toast.error('A disturbance in the Force prevents your ascension.');
     } finally {
       setIsLoading(false);
@@ -172,12 +189,17 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       const { error } = await signInWithGoogle();
       
       if (error) {
-        toast.error('The Empire\'s alliance with Google has failed.');
+        if (error.message.includes('popup')) {
+          toast.error('Google sign-in popup was blocked. Please allow popups and try again.');
+        } else {
+          toast.error(`Google sign-in failed: ${error.message}`);
+        }
         return;
       }
 
       toast.success('Redirecting through the Imperial network...');
     } catch (error) {
+      console.error('Google sign in error:', error);
       toast.error('A disturbance in the Force blocks your path.');
     } finally {
       setIsLoading(false);
@@ -192,7 +214,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       const { error } = await resetPassword(forgotPasswordEmail);
       
       if (error) {
-        toast.error('The dark side cannot locate this email in our archives.');
+        if (error.message.includes('not found')) {
+          toast.error('No account found with this email address.');
+        } else if (error.message.includes('rate limit')) {
+          toast.error('Too many password reset requests. Please wait before trying again.');
+        } else {
+          toast.error(`Password reset failed: ${error.message}`);
+        }
         return;
       }
 
@@ -200,6 +228,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       setShowForgotPassword(false);
       setForgotPasswordEmail('');
     } catch (error) {
+      console.error('Password reset error:', error);
       toast.error('The Force prevents this transmission.');
     } finally {
       setIsLoading(false);
