@@ -1,92 +1,52 @@
 import React, { useState, useMemo } from 'react';
-import { Search, MapPin, Shield, Zap, Star, Crown, Swords, Moon, User, LogOut } from 'lucide-react';
+import { Search, MapPin, Shield, Zap, Star, Crown, Swords, Moon, User, LogOut, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import StarField from '@/components/StarField';
 import AuthModal from '@/components/auth/AuthModal';
 import BookingModal from '@/components/booking/BookingModal';
+import DarthZenChat from '@/components/DarthZenChat';
 import { toast } from '@/components/ui/sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { signOut } from '@/lib/supabase';
+import { getTopDestinations, searchDestinations, getDestinationsByRank } from '@/data/destinations';
+import { getUserTier } from '@/data/subscriptionTiers';
+import { useNavigate } from 'react-router-dom';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedDestination, setSelectedDestination] = useState<any>(null);
+  const [showDarthZen, setShowDarthZen] = useState(false);
   
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
 
-  const destinations = [
-    {
-      name: "Mustafar Volcano Spires",
-      description: "Lava bath chambers and fortress suites",
-      price: "2,500 Imperial Credits",
-      image: "https://images.unsplash.com/photo-1494891848038-7bd202a2afeb?auto=format&fit=crop&w=800&q=80",
-      danger: 5,
-      luxury: 4,
-      keywords: ["mustafar", "volcano", "lava", "fortress", "fire", "heat"]
-    },
-    {
-      name: "Exegol Meditation Crypts",
-      description: "Infinite silence and power surges",
-      price: "5,000 Imperial Credits",
-      image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=800&q=80",
-      danger: 4,
-      luxury: 5,
-      keywords: ["exegol", "meditation", "crypts", "silence", "power", "dark"]
-    },
-    {
-      name: "Korriban Tomb Suites",
-      description: "Sleep among the ancient Sith Lords",
-      price: "3,800 Imperial Credits",
-      image: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
-      danger: 5,
-      luxury: 3,
-      keywords: ["korriban", "tomb", "ancient", "sith", "lords", "burial"]
-    },
-    {
-      name: "Dromund Kaas Sky Sanctums",
-      description: "Luxury in a storm-wracked skyline",
-      price: "4,200 Imperial Credits",
-      image: "https://images.unsplash.com/photo-1470813740244-df37b8c1edcb?auto=format&fit=crop&w=800&q=80",
-      danger: 3,
-      luxury: 5,
-      keywords: ["dromund", "kaas", "sky", "storm", "luxury", "skyline"]
-    },
-    {
-      name: "Dathomir Nightsister Retreats",
-      description: "Mystical caves with ancient magic",
-      price: "4,500 Imperial Credits",
-      image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=800&q=80",
-      danger: 4,
-      luxury: 4,
-      keywords: ["dathomir", "nightsister", "magic", "caves", "mystical", "witches"]
-    },
-    {
-      name: "Malachor Shadow Temples",
-      description: "Where the Force itself was broken",
-      price: "6,000 Imperial Credits",
-      image: "https://images.unsplash.com/photo-1518709268805-4e9042af2176?auto=format&fit=crop&w=800&q=80",
-      danger: 5,
-      luxury: 3,
-      keywords: ["malachor", "shadow", "temples", "force", "broken", "ancient"]
-    }
-  ];
+  const userRank = user?.user_metadata?.rank || 'Acolyte';
+  const userTier = getUserTier(userRank);
+
+  // Get top 10 destinations that user has access to
+  const topDestinations = useMemo(() => {
+    const accessible = getDestinationsByRank(userRank);
+    return getTopDestinations(10).filter(dest => 
+      accessible.some(acc => acc.id === dest.id)
+    );
+  }, [userRank]);
 
   const filteredDestinations = useMemo(() => {
-    if (!searchQuery.trim()) return destinations;
+    if (!searchQuery.trim()) return topDestinations;
     
-    const query = searchQuery.toLowerCase();
-    return destinations.filter(destination => 
-      destination.name.toLowerCase().includes(query) ||
-      destination.description.toLowerCase().includes(query) ||
-      destination.keywords.some(keyword => keyword.includes(query))
+    const accessible = getDestinationsByRank(userRank);
+    const searched = searchDestinations(searchQuery);
+    return searched.filter(dest => 
+      accessible.some(acc => acc.id === dest.id)
     );
-  }, [searchQuery]);
+  }, [searchQuery, userRank, topDestinations]);
 
   const amenities = [
     { name: "Force Meditation Chambers", icon: Moon, description: "Channel the dark side in isolation" },
@@ -147,11 +107,6 @@ const Index = () => {
     return user.user_metadata?.full_name || user.email?.split('@')[0] || 'Sith Acolyte';
   };
 
-  const getUserRank = () => {
-    if (!user) return '';
-    return user.user_metadata?.rank || 'Sith Acolyte';
-  };
-
   const getUserInitials = () => {
     const name = getUserDisplayName();
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -182,8 +137,24 @@ const Index = () => {
             </div>
             <div className="flex items-center space-x-6">
               <a href="#destinations" className="hover:text-sith-red transition-colors font-medium">Destinations</a>
+              <Button
+                variant="ghost"
+                onClick={() => navigate('/all-destinations')}
+                className="hover:text-sith-red transition-colors font-medium"
+              >
+                All Destinations
+                <ExternalLink className="h-4 w-4 ml-1" />
+              </Button>
               <a href="#amenities" className="hover:text-sith-red transition-colors font-medium">Amenities</a>
               <a href="#reviews" className="hover:text-sith-red transition-colors font-medium">Reviews</a>
+              <Button
+                variant="ghost"
+                onClick={() => navigate('/subscription-tiers')}
+                className="hover:text-sith-red transition-colors font-medium"
+              >
+                Ranks
+                <Crown className="h-4 w-4 ml-1" />
+              </Button>
               
               {user ? (
                 <DropdownMenu>
@@ -202,8 +173,15 @@ const Index = () => {
                       <User className="mr-2 h-4 w-4" />
                       <div className="flex flex-col">
                         <span>{getUserDisplayName()}</span>
-                        <span className="text-xs text-sith-red">{getUserRank()}</span>
+                        <span className="text-xs text-sith-red">{userRank}</span>
                       </div>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => navigate('/subscription-tiers')}
+                      className="text-white hover:bg-sith-gray/50"
+                    >
+                      <Crown className="mr-2 h-4 w-4" />
+                      <span>Upgrade Rank</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={handleLogout}
@@ -245,6 +223,17 @@ const Index = () => {
             Luxury, secrecy, and domination await in the darkest corners of space.
           </p>
           
+          {user && (
+            <div className="mb-6">
+              <Badge className="bg-sith-red text-white text-lg px-4 py-2">
+                Welcome, {userRank} {getUserDisplayName()}
+              </Badge>
+              <p className="text-sm text-gray-400 mt-2">
+                Access to {userTier.destinationLimit === 999 ? 'all' : userTier.destinationLimit} destinations
+              </p>
+            </div>
+          )}
+          
           <div className="max-w-2xl mx-auto mb-8">
             <div className="flex gap-4">
               <div className="flex-1 relative">
@@ -256,8 +245,11 @@ const Index = () => {
                   className="pl-10 bg-sith-gray/80 border-sith-red/30 text-white placeholder-gray-400 h-12 backdrop-blur-sm"
                 />
               </div>
-              <Button className="sith-button h-12 px-8">
-                Search the Void
+              <Button 
+                className="sith-button h-12 px-8"
+                onClick={() => setShowDarthZen(true)}
+              >
+                Consult Darth ZEN
               </Button>
             </div>
           </div>
@@ -284,12 +276,22 @@ const Index = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-5xl font-bold mb-4 sith-text-glow">Dark Destinations</h2>
-            <p className="text-xl text-gray-300">Where only the most powerful dare to tread</p>
+            <p className="text-xl text-gray-300">Top-rated destinations for your rank</p>
             {searchQuery && (
               <p className="text-sith-red mt-2">
                 Found {filteredDestinations.length} destinations matching "{searchQuery}"
               </p>
             )}
+            <div className="mt-4">
+              <Button
+                variant="outline"
+                onClick={() => navigate('/all-destinations')}
+                className="border-sith-red/30 text-sith-red hover:bg-sith-red hover:text-white"
+              >
+                View All {getDestinationsByRank(userRank).length} Destinations
+                <ExternalLink className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -302,13 +304,27 @@ const Index = () => {
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-sith-black via-transparent to-transparent opacity-80"></div>
-                  <div className="absolute top-4 right-4 flex space-x-2">
+                  <div className="absolute top-4 right-4 flex flex-col space-y-2">
                     <div className="bg-sith-red/90 px-2 py-1 rounded text-xs font-bold backdrop-blur-sm">
-                      Danger: {destination.danger}/5
+                      Adventure: {destination.adventureLevel}/10
                     </div>
                     <div className="bg-sith-red/90 px-2 py-1 rounded text-xs font-bold backdrop-blur-sm">
-                      Luxury: {destination.luxury}/5
+                      Danger: {destination.dangerLevel}/10
                     </div>
+                    <div className="bg-sith-red/90 px-2 py-1 rounded text-xs font-bold backdrop-blur-sm">
+                      {destination.gravityLevel}G
+                    </div>
+                  </div>
+                  <div className="absolute top-4 left-4">
+                    <Badge className="bg-purple-600 text-white text-xs">
+                      {destination.requiredRank}
+                    </Badge>
+                  </div>
+                  <div className="absolute bottom-4 left-4 flex items-center space-x-1">
+                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                    <span className="text-white text-sm font-bold">
+                      {destination.ratings.average} ({destination.ratings.count})
+                    </span>
                   </div>
                 </div>
                 <CardHeader>
@@ -318,6 +334,9 @@ const Index = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
+                  <p className="text-sm text-gray-400 mb-4 line-clamp-2">
+                    {destination.backgroundLore}
+                  </p>
                   <div className="flex justify-between items-center">
                     <span className="text-2xl font-bold text-sith-red">{destination.price}</span>
                     <Button 
@@ -349,13 +368,21 @@ const Index = () => {
               <div className="w-16 h-16 bg-sith-red rounded-full animate-glow-pulse"></div>
             </div>
             <h2 className="text-4xl font-bold mb-4 sith-text-glow title-font">Darth ZEN</h2>
-            <p className="text-xl mb-6 text-sith-red font-semibold">Your Sith Concierge Bot</p>
+            <p className="text-xl mb-6 text-sith-red font-semibold">Your Sith Concierge AI</p>
             <p className="text-lg mb-8 text-gray-300">
               "Greetings, worthy traveler. I sense great power within you. Allow me to guide you to destinations that match your darkness level and Force sensitivity."
             </p>
-            <Button className="sith-button text-lg px-8 py-4">
+            <Button 
+              className="sith-button text-lg px-8 py-4"
+              onClick={() => setShowDarthZen(true)}
+            >
               Consult the Dark Oracle
             </Button>
+            {!userTier.hasAiChat && (
+              <p className="text-sm text-yellow-400 mt-4">
+                ⚠ Upgrade to Inquisitor rank or higher for full AI access
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -431,7 +458,9 @@ const Index = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {['Acolyte', 'Inquisitor', 'Lord', 'Darth'].map((rank, index) => (
-              <div key={index} className="galaxy-card p-6 hover:sith-glow transition-all duration-300 group">
+              <div key={index} className={`galaxy-card p-6 hover:sith-glow transition-all duration-300 group ${
+                userRank === rank ? 'ring-2 ring-sith-red' : ''
+              }`}>
                 <div className="w-16 h-16 mx-auto mb-4 bg-sith-red/20 rounded-full flex items-center justify-center group-hover:animate-pulse-glow">
                   <Crown className="h-8 w-8 text-sith-red" />
                 </div>
@@ -442,8 +471,20 @@ const Index = () => {
                   {index + 1 === 3 && "Force-enhanced luxury suites"}
                   {index + 1 === 4 && "Ultimate power and access"}
                 </p>
+                {userRank === rank && (
+                  <Badge className="bg-sith-red text-white mt-2">Current</Badge>
+                )}
               </div>
             ))}
+          </div>
+          
+          <div className="mt-8">
+            <Button
+              onClick={() => navigate('/subscription-tiers')}
+              className="sith-button text-lg px-8 py-3"
+            >
+              View All Ranks & Pricing
+            </Button>
           </div>
         </div>
       </section>
@@ -489,7 +530,7 @@ const Index = () => {
         </div>
       </footer>
 
-      {/* Modals */}
+      {/* Modals and Components */}
       <AuthModal 
         isOpen={showAuthModal} 
         onClose={() => setShowAuthModal(false)}
@@ -499,6 +540,11 @@ const Index = () => {
         isOpen={showBookingModal}
         onClose={() => setShowBookingModal(false)}
         destination={selectedDestination}
+      />
+
+      <DarthZenChat
+        isOpen={showDarthZen}
+        onToggle={() => setShowDarthZen(!showDarthZen)}
       />
     </div>
   );
