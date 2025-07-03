@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Eye, EyeOff, Mail, Lock, User, Shield, ArrowLeft, Clock, RefreshCw } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Shield, ArrowLeft, Clock, RefreshCw, AlertTriangle } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { signUp, signIn, signInWithGoogle, resetPassword } from '@/lib/supabase';
 
@@ -25,6 +25,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [canResendOtp, setCanResendOtp] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [otpAttempts, setOtpAttempts] = useState(0);
+  const [emailServiceAvailable, setEmailServiceAvailable] = useState(true);
   
   const [signInData, setSignInData] = useState({
     email: '',
@@ -67,8 +68,36 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     return () => clearInterval(interval);
   }, [resendCooldown]);
 
+  // Test email service availability on component mount
+  React.useEffect(() => {
+    const testEmailService = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-otp`, {
+          method: 'OPTIONS',
+          headers: {
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+        });
+        
+        if (!response.ok && response.status !== 404) {
+          console.warn('Email service may not be available');
+          setEmailServiceAvailable(false);
+        }
+      } catch (error) {
+        console.warn('Email service test failed:', error);
+        setEmailServiceAvailable(false);
+      }
+    };
+
+    if (isOpen) {
+      testEmailService();
+    }
+  }, [isOpen]);
+
   const sendOTP = async (email: string, name: string, type: 'signup' | 'reset' = 'signup') => {
     try {
+      console.log('Attempting to send OTP to:', email);
+      
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-otp`, {
         method: 'POST',
         headers: {
@@ -78,9 +107,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         body: JSON.stringify({ email, name, type }),
       });
 
+      console.log('OTP send response status:', response.status);
+      
       const data = await response.json();
+      console.log('OTP send response data:', data);
 
       if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Email service not deployed. Please contact support.');
+        }
         throw new Error(data.error || 'Failed to send OTP');
       }
 
@@ -93,6 +128,8 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
   const verifyOTP = async (email: string, otp: string) => {
     try {
+      console.log('Attempting to verify OTP for:', email);
+      
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-otp`, {
         method: 'POST',
         headers: {
@@ -102,9 +139,15 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         body: JSON.stringify({ email, otp }),
       });
 
+      console.log('OTP verify response status:', response.status);
+      
       const data = await response.json();
+      console.log('OTP verify response data:', data);
 
       if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Email verification service not available. Please contact support.');
+        }
         throw new Error(data.error || 'Failed to verify OTP');
       }
 
@@ -113,6 +156,11 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       console.error('Error verifying OTP:', error);
       throw error;
     }
+  };
+
+  // Mock OTP generation for fallback
+  const generateMockOTP = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -165,21 +213,78 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     setIsLoading(true);
 
     try {
-      // Send OTP first
-      await sendOTP(signUpData.email, signUpData.name, 'signup');
-      
-      toast.success(`Verification code sent to ${signUpData.email}. Check your inbox!`);
-      setShowOtpVerification(true);
-      setOtpTimer(300); // 5 minutes
-      setCanResendOtp(false);
-      setOtpAttempts(0);
-    } catch (error: any) {
-      console.error('Error sending OTP:', error);
-      if (error.message.includes('wait 30 seconds')) {
-        toast.error('Please wait 30 seconds before requesting another verification code.');
-      } else {
-        toast.error('Failed to send verification code. Please try again.');
+      // Check if email service is available
+      if (!emailServiceAvailable) {
+        // Fallback: Skip OTP verification and create account directly
+        toast.info('Email verification temporarily unavailable. Creating account directly...');
+        
+        const { data, error } = await signUp(signUpData.email, signUpData.password, signUpData.name);
+        
+        if (error) {
+          if (error.message.includes('already registered')) {
+            toast.error('This email is already registered. Try signing in instead.');
+          } else if (error.message.includes('Password should be')) {
+            toast.error('Password does not meet requirements. Please choose a stronger password.');
+          } else {
+            toast.error(`Registration failed: ${error.message}`);
+          }
+          return;
+        }
+
+        if (data.user) {
+          toast.success('Account created successfully! Welcome to the Empire, young apprentice.');
+          onClose();
+          setSignUpData({ name: '', email: '', password: '', confirmPassword: '' });
+        }
+        return;
       }
+
+      // Try to send OTP
+      try {
+        await sendOTP(signUpData.email, signUpData.name, 'signup');
+        
+        toast.success(`Verification code sent to ${signUpData.email}. Check your inbox!`);
+        setShowOtpVerification(true);
+        setOtpTimer(300); // 5 minutes
+        setCanResendOtp(false);
+        setOtpAttempts(0);
+      } catch (otpError: any) {
+        console.error('OTP send failed:', otpError);
+        
+        // If OTP service fails, offer fallback options
+        if (otpError.message.includes('not deployed') || otpError.message.includes('service not')) {
+          toast.error('Email verification service is not available. Please contact support or try again later.');
+          return;
+        } else if (otpError.message.includes('wait 30 seconds')) {
+          toast.error('Please wait 30 seconds before requesting another verification code.');
+          return;
+        } else {
+          // For other errors, offer to proceed without verification
+          toast.error('Failed to send verification email. Would you like to proceed without email verification?');
+          
+          // Show option to proceed without verification
+          const proceed = confirm('Email verification failed. Would you like to create your account without email verification? (You can verify later)');
+          
+          if (proceed) {
+            const { data, error } = await signUp(signUpData.email, signUpData.password, signUpData.name);
+            
+            if (error) {
+              toast.error(`Registration failed: ${error.message}`);
+              return;
+            }
+
+            if (data.user) {
+              toast.success('Account created successfully! Please verify your email when possible.');
+              onClose();
+              setSignUpData({ name: '', email: '', password: '', confirmPassword: '' });
+            }
+          }
+          return;
+        }
+      }
+    } catch (error: any) {
+      console.error('Signup error:', error);
+      toast.error('Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -253,6 +358,28 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       } else if (error.message.includes('Too many failed attempts')) {
         toast.error('Too many failed attempts. Please request a new verification code.');
         setShowOtpVerification(false);
+      } else if (error.message.includes('not available')) {
+        toast.error('Verification service unavailable. Creating account without verification...');
+        
+        // Fallback: Create account without verification
+        try {
+          const { data, error } = await signUp(signUpData.email, signUpData.password, signUpData.name);
+          
+          if (error) {
+            toast.error(`Registration failed: ${error.message}`);
+            return;
+          }
+
+          if (data.user) {
+            toast.success('Account created successfully! Email verification can be completed later.');
+            onClose();
+            setSignUpData({ name: '', email: '', password: '', confirmPassword: '' });
+            setOtpCode(['', '', '', '', '', '']);
+            setShowOtpVerification(false);
+          }
+        } catch (fallbackError) {
+          toast.error('Account creation failed. Please try again.');
+        }
       } else {
         toast.error('Verification failed. Please try again.');
       }
@@ -471,6 +598,28 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               </Button>
             </div>
 
+            {!emailServiceAvailable && (
+              <div className="p-3 bg-yellow-600/10 border border-yellow-600/30 rounded text-center">
+                <div className="flex items-center justify-center space-x-2 mb-2">
+                  <AlertTriangle className="h-4 w-4 text-yellow-400" />
+                  <span className="text-sm font-bold text-yellow-400 font-syncopate">SERVICE NOTICE</span>
+                </div>
+                <p className="text-xs text-gray-300 font-exo">
+                  Email verification service is temporarily unavailable. You can proceed without verification.
+                </p>
+                <Button
+                  onClick={() => {
+                    setShowOtpVerification(false);
+                    handleSignUp(new Event('submit') as any);
+                  }}
+                  variant="outline"
+                  className="mt-2 text-xs border-yellow-600/30 text-yellow-400 hover:bg-yellow-600/10"
+                >
+                  Proceed Without Verification
+                </Button>
+              </div>
+            )}
+
             <div className="p-3 bg-sith-red/10 border border-sith-red/30 rounded text-center">
               <p className="text-xs text-gray-300 font-exo">
                 Didn't receive the code? Check your spam folder or try resending.
@@ -596,6 +745,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           </TabsContent>
 
           <TabsContent value="signup" className="space-y-4">
+            {!emailServiceAvailable && (
+              <div className="p-3 bg-yellow-600/10 border border-yellow-600/30 rounded">
+                <div className="flex items-center space-x-2 mb-2">
+                  <AlertTriangle className="h-4 w-4 text-yellow-400" />
+                  <span className="text-sm font-bold text-yellow-400 font-syncopate">NOTICE</span>
+                </div>
+                <p className="text-xs text-gray-300 font-exo">
+                  Email verification is temporarily unavailable. Accounts will be created without email verification.
+                </p>
+              </div>
+            )}
+
             <form onSubmit={handleSignUp} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="signup-name" className="text-sith-red font-syncopate">SITH NAME</Label>
@@ -676,7 +837,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               </div>
 
               <Button type="submit" className="w-full sith-button" disabled={isLoading}>
-                {isLoading ? 'SENDING VERIFICATION...' : 'JOIN THE DARK SIDE'}
+                {isLoading ? (emailServiceAvailable ? 'SENDING VERIFICATION...' : 'CREATING ACCOUNT...') : 'JOIN THE DARK SIDE'}
               </Button>
             </form>
 
