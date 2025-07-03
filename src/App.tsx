@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import AllDestinations from "./pages/AllDestinations";
 import SubscriptionTiers from "./pages/SubscriptionTiers";
+import PaymentPortal from "./pages/PaymentPortal";
 import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 
@@ -21,6 +22,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/all-destinations" element={<AllDestinations />} />
           <Route path="/subscription-tiers" element={<SubscriptionTiers />} />
+          <Route path="/payment-portal" element={<PaymentPortal />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Audiowide&family=Syncopate:wght@400;700&family=Exo+2:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
@@ -57,7 +57,7 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-sith-black text-white font-['Space_Grotesk'];
+    @apply bg-sith-black text-white font-exo;
     background: 
       radial-gradient(circle at 20% 80%, rgba(220, 38, 38, 0.15) 0%, transparent 50%),
       radial-gradient(circle at 80% 20%, rgba(220, 38, 38, 0.15) 0%, transparent 50%),
@@ -67,13 +67,33 @@ All colors MUST be HSL.
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-['Rajdhani'];
-    font-weight: 600;
-    letter-spacing: 0.02em;
+    @apply font-syncopate;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
 
   .title-font {
-    @apply font-['Orbitron'];
+    @apply font-orbitron;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+  }
+
+  .planet-name {
+    @apply font-audiowide;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .description-text {
+    @apply font-exo;
+    font-weight: 400;
+    line-height: 1.6;
+  }
+
+  .mono-text {
+    @apply font-share-tech;
+    letter-spacing: 0.05em;
   }
 }
 
@@ -90,11 +110,13 @@ All colors MUST be HSL.
   }
 
   .sith-button {
-    @apply bg-gradient-to-r from-sith-red via-sith-red-light to-sith-red text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 relative overflow-hidden;
+    @apply bg-gradient-to-r from-sith-red via-sith-red-light to-sith-red text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 relative overflow-hidden font-syncopate;
     box-shadow: 
       0 0 20px rgba(220, 38, 38, 0.4),
       inset 0 1px 0 rgba(255, 255, 255, 0.2);
     border: 1px solid rgba(220, 38, 38, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
 
   .sith-button::before {
@@ -203,6 +225,23 @@ All colors MUST be HSL.
       radial-gradient(ellipse at 80% 70%, rgba(139, 69, 19, 0.15) 0%, transparent 50%),
       radial-gradient(ellipse at 50% 50%, rgba(75, 0, 130, 0.1) 0%, transparent 50%);
   }
+
+  .otp-input {
+    @apply w-12 h-12 text-center text-xl font-bold bg-sith-gray/50 border-2 border-sith-red/30 rounded-lg text-white font-share-tech;
+    transition: all 0.3s ease;
+  }
+
+  .otp-input:focus {
+    @apply border-sith-red outline-none;
+    box-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
+  }
+
+  .payment-card {
+    @apply bg-gradient-to-br from-gray-800 via-gray-900 to-black rounded-xl p-6 border border-sith-red/30;
+    background-image: 
+      radial-gradient(circle at 20% 20%, rgba(220, 38, 38, 0.1) 0%, transparent 50%),
+      linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.05) 100%);
+  }
 }
 
 /* Enhanced scrollbar */
@@ -244,10 +283,21 @@ All colors MUST be HSL.
   }
 }
 
+@keyframes matrix-rain {
+  0% { transform: translateY(-100vh); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
 .animate-float-slow {
   animation: float-slow 8s ease-in-out infinite;
 }
 
 .animate-pulse-glow {
   animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-matrix-rain {
+  animation: matrix-rain 3s linear infinite;
 }

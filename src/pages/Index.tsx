@@ -117,7 +117,7 @@ const Index = () => {
       <div className="min-h-screen bg-sith-black flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-sith-red border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-sith-red text-lg">Awakening the Force...</p>
+          <p className="text-sith-red text-lg title-font">AWAKENING THE FORCE...</p>
         </div>
       </div>
     );
@@ -132,27 +132,27 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold sith-text-glow title-font">ShadowPortals</h1>
-              <span className="text-sith-red text-sm font-medium">The Galaxy's Dark Elite</span>
+              <h1 className="text-2xl font-bold sith-text-glow title-font">SHADOWPORTALS</h1>
+              <span className="text-sith-red text-sm font-medium font-syncopate">THE GALAXY'S DARK ELITE</span>
             </div>
             <div className="flex items-center space-x-6">
-              <a href="#destinations" className="hover:text-sith-red transition-colors font-medium">Destinations</a>
+              <a href="#destinations" className="hover:text-sith-red transition-colors font-medium font-syncopate">DESTINATIONS</a>
               <Button
                 variant="ghost"
                 onClick={() => navigate('/all-destinations')}
-                className="hover:text-sith-red transition-colors font-medium"
+                className="hover:text-sith-red transition-colors font-medium font-syncopate"
               >
-                All Destinations
+                ALL DESTINATIONS
                 <ExternalLink className="h-4 w-4 ml-1" />
               </Button>
-              <a href="#amenities" className="hover:text-sith-red transition-colors font-medium">Amenities</a>
-              <a href="#reviews" className="hover:text-sith-red transition-colors font-medium">Reviews</a>
+              <a href="#amenities" className="hover:text-sith-red transition-colors font-medium font-syncopate">AMENITIES</a>
+              <a href="#reviews" className="hover:text-sith-red transition-colors font-medium font-syncopate">REVIEWS</a>
               <Button
                 variant="ghost"
                 onClick={() => navigate('/subscription-tiers')}
-                className="hover:text-sith-red transition-colors font-medium"
+                className="hover:text-sith-red transition-colors font-medium font-syncopate"
               >
-                Ranks
+                RANKS
                 <Crown className="h-4 w-4 ml-1" />
               </Button>
               
@@ -162,7 +162,7 @@ const Index = () => {
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                       <Avatar className="h-8 w-8 border border-sith-red/30">
                         <AvatarImage src={user.user_metadata?.avatar_url} />
-                        <AvatarFallback className="bg-sith-red text-white">
+                        <AvatarFallback className="bg-sith-red text-white font-syncopate">
                           {getUserInitials()}
                         </AvatarFallback>
                       </Avatar>
@@ -172,23 +172,23 @@ const Index = () => {
                     <DropdownMenuItem className="text-white hover:bg-sith-gray/50">
                       <User className="mr-2 h-4 w-4" />
                       <div className="flex flex-col">
-                        <span>{getUserDisplayName()}</span>
-                        <span className="text-xs text-sith-red">{userRank}</span>
+                        <span className="font-exo">{getUserDisplayName()}</span>
+                        <span className="text-xs text-sith-red font-syncopate">{userRank}</span>
                       </div>
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={() => navigate('/subscription-tiers')}
-                      className="text-white hover:bg-sith-gray/50"
+                      className="text-white hover:bg-sith-gray/50 font-syncopate"
                     >
                       <Crown className="mr-2 h-4 w-4" />
-                      <span>Upgrade Rank</span>
+                      <span>UPGRADE RANK</span>
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={handleLogout}
-                      className="text-white hover:bg-sith-gray/50"
+                      className="text-white hover:bg-sith-gray/50 font-syncopate"
                     >
                       <LogOut className="mr-2 h-4 w-4" />
-                      <span>Logout</span>
+                      <span>LOGOUT</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -197,7 +197,7 @@ const Index = () => {
                   className="sith-button"
                   onClick={() => setShowAuthModal(true)}
                 >
-                  Join the Empire
+                  JOIN THE EMPIRE
                 </Button>
               )}
             </div>
@@ -216,19 +216,19 @@ const Index = () => {
           <h1 className="text-6xl md:text-8xl font-black mb-6 sith-text-glow animate-pulse-glow title-font">
             SHADOWPORTALS
           </h1>
-          <p className="text-2xl md:text-3xl mb-4 text-sith-red font-bold">
-            Book Your Stay in the Shadows of the Galaxy
+          <p className="text-2xl md:text-3xl mb-4 text-sith-red font-bold planet-name">
+            BOOK YOUR STAY IN THE SHADOWS OF THE GALAXY
           </p>
-          <p className="text-xl mb-8 opacity-90 font-medium">
+          <p className="text-xl mb-8 opacity-90 font-medium description-text">
             Luxury, secrecy, and domination await in the darkest corners of space.
           </p>
           
           {user && (
             <div className="mb-6">
-              <Badge className="bg-sith-red text-white text-lg px-4 py-2">
-                Welcome, {userRank} {getUserDisplayName()}
+              <Badge className="bg-sith-red text-white text-lg px-4 py-2 font-syncopate">
+                WELCOME, {userRank.toUpperCase()} {getUserDisplayName().toUpperCase()}
               </Badge>
-              <p className="text-sm text-gray-400 mt-2">
+              <p className="text-sm text-gray-400 mt-2 font-exo">
                 Access to {userTier.destinationLimit === 999 ? 'all' : userTier.destinationLimit} destinations
               </p>
             </div>
@@ -242,14 +242,14 @@ const Index = () => {
                   placeholder="Search destinations... let the dark side guide you"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-sith-gray/80 border-sith-red/30 text-white placeholder-gray-400 h-12 backdrop-blur-sm"
+                  className="pl-10 bg-sith-gray/80 border-sith-red/30 text-white placeholder-gray-400 h-12 backdrop-blur-sm font-exo"
                 />
               </div>
               <Button 
                 className="sith-button h-12 px-8"
                 onClick={() => setShowDarthZen(true)}
               >
-                Consult Darth ZEN
+                CONSULT DARTH ZEN
               </Button>
             </div>
           </div>
@@ -257,15 +257,15 @@ const Index = () => {
           <div className="flex justify-center space-x-8 text-sm">
             <div className="flex items-center space-x-2">
               <Shield className="h-4 w-4 text-sith-red" />
-              <span className="font-medium">Jedi-Free Zones</span>
+              <span className="font-medium font-syncopate">JEDI-FREE ZONES</span>
             </div>
             <div className="flex items-center space-x-2">
               <Zap className="h-4 w-4 text-sith-red" />
-              <span className="font-medium">Force Enhanced</span>
+              <span className="font-medium font-syncopate">FORCE ENHANCED</span>
             </div>
             <div className="flex items-center space-x-2">
               <Crown className="h-4 w-4 text-sith-red" />
-              <span className="font-medium">Empire Approved</span>
+              <span className="font-medium font-syncopate">EMPIRE APPROVED</span>
             </div>
           </div>
         </div>
@@ -275,10 +275,10 @@ const Index = () => {
       <section id="destinations" className="py-20 px-4 relative">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold mb-4 sith-text-glow">Dark Destinations</h2>
-            <p className="text-xl text-gray-300">Top-rated destinations for your rank</p>
+            <h2 className="text-5xl font-bold mb-4 sith-text-glow title-font">DARK DESTINATIONS</h2>
+            <p className="text-xl text-gray-300 description-text">Top-rated destinations for your rank</p>
             {searchQuery && (
-              <p className="text-sith-red mt-2">
+              <p className="text-sith-red mt-2 font-exo">
                 Found {filteredDestinations.length} destinations matching "{searchQuery}"
               </p>
             )}
@@ -286,9 +286,9 @@ const Index = () => {
               <Button
                 variant="outline"
                 onClick={() => navigate('/all-destinations')}
-                className="border-sith-red/30 text-sith-red hover:bg-sith-red hover:text-white"
+                className="border-sith-red/30 text-sith-red hover:bg-sith-red hover:text-white font-syncopate"
               >
-                View All {getDestinationsByRank(userRank).length} Destinations
+                VIEW ALL {getDestinationsByRank(userRank).length} DESTINATIONS
                 <ExternalLink className="h-4 w-4 ml-2" />
               </Button>
             </div>
@@ -305,45 +305,45 @@ const Index = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-sith-black via-transparent to-transparent opacity-80"></div>
                   <div className="absolute top-4 right-4 flex flex-col space-y-2">
-                    <div className="bg-sith-red/90 px-2 py-1 rounded text-xs font-bold backdrop-blur-sm">
-                      Adventure: {destination.adventureLevel}/10
+                    <div className="bg-sith-red/90 px-2 py-1 rounded text-xs font-bold backdrop-blur-sm mono-text">
+                      ADV: {destination.adventureLevel}/10
                     </div>
-                    <div className="bg-sith-red/90 px-2 py-1 rounded text-xs font-bold backdrop-blur-sm">
-                      Danger: {destination.dangerLevel}/10
+                    <div className="bg-sith-red/90 px-2 py-1 rounded text-xs font-bold backdrop-blur-sm mono-text">
+                      DNG: {destination.dangerLevel}/10
                     </div>
-                    <div className="bg-sith-red/90 px-2 py-1 rounded text-xs font-bold backdrop-blur-sm">
+                    <div className="bg-sith-red/90 px-2 py-1 rounded text-xs font-bold backdrop-blur-sm mono-text">
                       {destination.gravityLevel}G
                     </div>
                   </div>
                   <div className="absolute top-4 left-4">
-                    <Badge className="bg-purple-600 text-white text-xs">
-                      {destination.requiredRank}
+                    <Badge className="bg-purple-600 text-white text-xs font-syncopate">
+                      {destination.requiredRank.toUpperCase()}
                     </Badge>
                   </div>
                   <div className="absolute bottom-4 left-4 flex items-center space-x-1">
                     <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                    <span className="text-white text-sm font-bold">
+                    <span className="text-white text-sm font-bold mono-text">
                       {destination.ratings.average} ({destination.ratings.count})
                     </span>
                   </div>
                 </div>
                 <CardHeader>
-                  <CardTitle className="text-2xl text-sith-red">{destination.name}</CardTitle>
-                  <CardDescription className="text-gray-300 text-lg">
+                  <CardTitle className="text-2xl text-sith-red planet-name">{destination.name}</CardTitle>
+                  <CardDescription className="text-gray-300 text-lg description-text">
                     {destination.description}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm text-gray-400 mb-4 line-clamp-2">
+                  <p className="text-sm text-gray-400 mb-4 line-clamp-2 description-text">
                     {destination.backgroundLore}
                   </p>
                   <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold text-sith-red">{destination.price}</span>
+                    <span className="text-2xl font-bold text-sith-red mono-text">{destination.price}</span>
                     <Button 
                       className="sith-button"
                       onClick={() => handleBookDestination(destination)}
                     >
-                      Enter the Darkness
+                      ENTER THE DARKNESS
                     </Button>
                   </div>
                 </CardContent>
@@ -353,8 +353,8 @@ const Index = () => {
 
           {filteredDestinations.length === 0 && searchQuery && (
             <div className="text-center py-12">
-              <p className="text-xl text-gray-400">No destinations found matching your search.</p>
-              <p className="text-sith-red">The dark side has not yet revealed these secrets...</p>
+              <p className="text-xl text-gray-400 description-text">No destinations found matching your search.</p>
+              <p className="text-sith-red font-syncopate">THE DARK SIDE HAS NOT YET REVEALED THESE SECRETS...</p>
             </div>
           )}
         </div>
@@ -367,20 +367,20 @@ const Index = () => {
             <div className="w-32 h-32 mx-auto mb-8 bg-sith-red/20 rounded-full flex items-center justify-center sith-glow animate-pulse-glow">
               <div className="w-16 h-16 bg-sith-red rounded-full animate-glow-pulse"></div>
             </div>
-            <h2 className="text-4xl font-bold mb-4 sith-text-glow title-font">Darth ZEN</h2>
-            <p className="text-xl mb-6 text-sith-red font-semibold">Your Sith Concierge AI</p>
-            <p className="text-lg mb-8 text-gray-300">
+            <h2 className="text-4xl font-bold mb-4 sith-text-glow title-font">DARTH ZEN</h2>
+            <p className="text-xl mb-6 text-sith-red font-semibold planet-name">YOUR SITH CONCIERGE AI</p>
+            <p className="text-lg mb-8 text-gray-300 description-text">
               "Greetings, worthy traveler. I sense great power within you. Allow me to guide you to destinations that match your darkness level and Force sensitivity."
             </p>
             <Button 
               className="sith-button text-lg px-8 py-4"
               onClick={() => setShowDarthZen(true)}
             >
-              Consult the Dark Oracle
+              CONSULT THE DARK ORACLE
             </Button>
             {!userTier.hasAiChat && (
-              <p className="text-sm text-yellow-400 mt-4">
-                ⚠ Upgrade to Inquisitor rank or higher for full AI access
+              <p className="text-sm text-yellow-400 mt-4 font-syncopate">
+                ⚠ UPGRADE TO INQUISITOR RANK OR HIGHER FOR FULL AI ACCESS
               </p>
             )}
           </div>
@@ -391,8 +391,8 @@ const Index = () => {
       <section id="amenities" className="py-20 px-4 relative">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold mb-4 sith-text-glow">Sith Amenities</h2>
-            <p className="text-xl text-gray-300">Luxuries befitting the dark side elite</p>
+            <h2 className="text-5xl font-bold mb-4 sith-text-glow title-font">SITH AMENITIES</h2>
+            <p className="text-xl text-gray-300 description-text">Luxuries befitting the dark side elite</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -402,10 +402,10 @@ const Index = () => {
                   <div className="w-16 h-16 mx-auto mb-4 bg-sith-red/20 rounded-full flex items-center justify-center group-hover:bg-sith-red/40 transition-colors group-hover:animate-pulse-glow">
                     <amenity.icon className="h-8 w-8 text-sith-red" />
                   </div>
-                  <CardTitle className="text-xl text-sith-red">{amenity.name}</CardTitle>
+                  <CardTitle className="text-xl text-sith-red planet-name">{amenity.name}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-300">{amenity.description}</p>
+                  <p className="text-gray-300 description-text">{amenity.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -417,8 +417,8 @@ const Index = () => {
       <section id="reviews" className="py-20 px-4 bg-sith-gray/20 relative">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-bold mb-4 sith-text-glow">Empire Reviews</h2>
-            <p className="text-xl text-gray-300">Testimonials from the galaxy's most feared</p>
+            <h2 className="text-5xl font-bold mb-4 sith-text-glow title-font">EMPIRE REVIEWS</h2>
+            <p className="text-xl text-gray-300 description-text">Testimonials from the galaxy's most feared</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -427,8 +427,8 @@ const Index = () => {
                 <CardHeader>
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <CardTitle className="text-xl text-sith-red">{review.name}</CardTitle>
-                      <CardDescription className="text-gray-400 font-medium">{review.rank}</CardDescription>
+                      <CardTitle className="text-xl text-sith-red planet-name">{review.name}</CardTitle>
+                      <CardDescription className="text-gray-400 font-medium font-syncopate">{review.rank}</CardDescription>
                     </div>
                     <div className="flex">
                       {[...Array(review.rating)].map((_, i) => (
@@ -438,10 +438,10 @@ const Index = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-300 mb-4 italic">"{review.review}"</p>
+                  <p className="text-gray-300 mb-4 italic description-text">"{review.review}"</p>
                   <div className="flex items-center space-x-2 text-sm text-sith-red">
                     <MapPin className="h-4 w-4" />
-                    <span className="font-medium">{review.planet}</span>
+                    <span className="font-medium planet-name">{review.planet}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -453,8 +453,8 @@ const Index = () => {
       {/* Dark Side Loyalty Program */}
       <section className="py-20 px-4 relative">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-5xl font-bold mb-8 sith-text-glow">Dark Side Ascension</h2>
-          <p className="text-xl mb-12 text-gray-300">Rise through the ranks of our loyalty program</p>
+          <h2 className="text-5xl font-bold mb-8 sith-text-glow title-font">DARK SIDE ASCENSION</h2>
+          <p className="text-xl mb-12 text-gray-300 description-text">Rise through the ranks of our loyalty program</p>
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {['Acolyte', 'Inquisitor', 'Lord', 'Darth'].map((rank, index) => (
@@ -464,15 +464,15 @@ const Index = () => {
                 <div className="w-16 h-16 mx-auto mb-4 bg-sith-red/20 rounded-full flex items-center justify-center group-hover:animate-pulse-glow">
                   <Crown className="h-8 w-8 text-sith-red" />
                 </div>
-                <h3 className="text-xl font-bold text-sith-red mb-2">{rank}</h3>
-                <p className="text-sm text-gray-400">
+                <h3 className="text-xl font-bold text-sith-red mb-2 planet-name">{rank}</h3>
+                <p className="text-sm text-gray-400 description-text">
                   {index + 1 === 1 && "Begin your journey into darkness"}
                   {index + 1 === 2 && "Access exclusive destinations"}
                   {index + 1 === 3 && "Force-enhanced luxury suites"}
                   {index + 1 === 4 && "Ultimate power and access"}
                 </p>
                 {userRank === rank && (
-                  <Badge className="bg-sith-red text-white mt-2">Current</Badge>
+                  <Badge className="bg-sith-red text-white mt-2 font-syncopate">CURRENT</Badge>
                 )}
               </div>
             ))}
@@ -483,7 +483,7 @@ const Index = () => {
               onClick={() => navigate('/subscription-tiers')}
               className="sith-button text-lg px-8 py-3"
             >
-              View All Ranks & Pricing
+              VIEW ALL RANKS & PRICING
             </Button>
           </div>
         </div>
@@ -494,12 +494,12 @@ const Index = () => {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-2xl font-bold mb-4 sith-text-glow title-font">ShadowPortals</h3>
-              <p className="text-gray-400">The galaxy's premier dark side travel platform.</p>
+              <h3 className="text-2xl font-bold mb-4 sith-text-glow title-font">SHADOWPORTALS</h3>
+              <p className="text-gray-400 description-text">The galaxy's premier dark side travel platform.</p>
             </div>
             <div>
-              <h4 className="text-lg font-semibold mb-4 text-sith-red">Destinations</h4>
-              <ul className="space-y-2 text-gray-400">
+              <h4 className="text-lg font-semibold mb-4 text-sith-red font-syncopate">DESTINATIONS</h4>
+              <ul className="space-y-2 text-gray-400 description-text">
                 <li>Mustafar</li>
                 <li>Exegol</li>
                 <li>Korriban</li>
@@ -507,8 +507,8 @@ const Index = () => {
               </ul>
             </div>
             <div>
-              <h4 className="text-lg font-semibold mb-4 text-sith-red">Services</h4>
-              <ul className="space-y-2 text-gray-400">
+              <h4 className="text-lg font-semibold mb-4 text-sith-red font-syncopate">SERVICES</h4>
+              <ul className="space-y-2 text-gray-400 description-text">
                 <li>Hyperspace Travel</li>
                 <li>Force Training</li>
                 <li>Sith Concierge</li>
@@ -516,16 +516,16 @@ const Index = () => {
               </ul>
             </div>
             <div>
-              <h4 className="text-lg font-semibold mb-4 text-sith-red">Empire Contact</h4>
-              <ul className="space-y-2 text-gray-400">
-                <li>Hologram: +GAL-SITH-RULE</li>
+              <h4 className="text-lg font-semibold mb-4 text-sith-red font-syncopate">EMPIRE CONTACT</h4>
+              <ul className="space-y-2 text-gray-400 description-text">
+                <li className="mono-text">Hologram: +GAL-SITH-RULE</li>
                 <li>darkside@shadowportals.empire</li>
                 <li>Death Star Sector 7</li>
               </ul>
             </div>
           </div>
           <div className="border-t border-sith-red/20 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; {new Date().getFullYear()} ShadowPortals. All rights reserved across the galaxy. May the Force serve you.</p>
+            <p className="description-text">&copy; {new Date().getFullYear()} ShadowPortals. All rights reserved across the galaxy. May the Force serve you.</p>
           </div>
         </div>
       </footer>

@@ -129,6 +129,12 @@ export default {
 					'50%': { 
 						boxShadow: '0 0 20px rgba(220, 38, 38, 0.8), 0 0 30px rgba(220, 38, 38, 0.6), 0 0 40px rgba(220, 38, 38, 0.4)'
 					}
+				},
+				'matrix-rain': {
+					'0%': { transform: 'translateY(-100vh)', opacity: '0' },
+					'10%': { opacity: '1' },
+					'90%': { opacity: '1' },
+					'100%': { transform: 'translateY(100vh)', opacity: '0' }
 				}
 			},
 			animation: {
@@ -140,7 +146,8 @@ export default {
 				'slide-up': 'slide-up 0.6s ease-out',
 				'twinkle': 'twinkle 3s infinite',
 				'float-slow': 'float-slow 8s ease-in-out infinite',
-				'pulse-glow': 'pulse-glow 3s ease-in-out infinite'
+				'pulse-glow': 'pulse-glow 3s ease-in-out infinite',
+				'matrix-rain': 'matrix-rain 3s linear infinite'
 			},
 			backgroundImage: {
 				'sith-gradient': 'linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #2a2a2a 100%)',
@@ -148,9 +155,11 @@ export default {
 				'nebula': 'radial-gradient(ellipse at 20% 30%, rgba(220, 38, 38, 0.2) 0%, transparent 50%), radial-gradient(ellipse at 80% 70%, rgba(139, 69, 19, 0.15) 0%, transparent 50%), radial-gradient(ellipse at 50% 50%, rgba(75, 0, 130, 0.1) 0%, transparent 50%)'
 			},
 			fontFamily: {
-				'rajdhani': ['Rajdhani', 'sans-serif'],
 				'orbitron': ['Orbitron', 'monospace'],
-				'space-grotesk': ['Space Grotesk', 'sans-serif']
+				'audiowide': ['Audiowide', 'cursive'],
+				'syncopate': ['Syncopate', 'sans-serif'],
+				'exo': ['Exo 2', 'sans-serif'],
+				'share-tech': ['Share Tech Mono', 'monospace']
 			}
 		}
 	},

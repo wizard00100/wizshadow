@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Eye, EyeOff, Mail, Lock, User, Shield } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Shield, ArrowLeft } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { signUp, signIn, signInWithGoogle, resetPassword } from '@/lib/supabase';
 
@@ -19,6 +19,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showOtpVerification, setShowOtpVerification] = useState(false);
+  const [otpCode, setOtpCode] = useState(['', '', '', '', '', '']);
+  const [generatedOtp, setGeneratedOtp] = useState('');
+  const [otpTimer, setOtpTimer] = useState(300); // 5 minutes
   
   const [signInData, setSignInData] = useState({
     email: '',
@@ -34,6 +38,18 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
 
+  // Generate 6-digit OTP
+  const generateOTP = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  };
+
+  // Mock email sending function
+  const sendOTPEmail = (email: string, otp: string) => {
+    console.log(`Sending OTP ${otp} to ${email}`);
+    // In a real app, this would call an email service
+    toast.success(`OTP sent to ${email}. Check your inbox!`);
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -42,18 +58,17 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       const { data, error } = await signIn(signInData.email, signInData.password);
       
       if (error) {
-        toast.error(error.message || 'Failed to sign in');
+        toast.error('The dark side rejects your credentials. Try again.');
         return;
       }
 
       if (data.user) {
-        toast.success('Welcome back to the dark side!');
+        toast.success('Welcome back to the dark side, my apprentice!');
         onClose();
-        // Reset form
         setSignInData({ email: '', password: '' });
       }
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('The Force disturbance prevents your entry.');
     } finally {
       setIsLoading(false);
     }
@@ -63,12 +78,66 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     e.preventDefault();
     
     if (signUpData.password !== signUpData.confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error('Your passwords do not align with the Force.');
       return;
     }
 
     if (signUpData.password.length < 6) {
-      toast.error('Password must be at least 6 characters');
+      toast.error('Your password lacks the strength of the dark side. Minimum 6 characters required.');
+      return;
+    }
+
+    // Generate and send OTP
+    const otp = generateOTP();
+    setGeneratedOtp(otp);
+    sendOTPEmail(signUpData.email, otp);
+    setShowOtpVerification(true);
+    
+    // Start OTP timer
+    const timer = setInterval(() => {
+      setOtpTimer(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          toast.error('The Force has withdrawn. OTP expired.');
+          setShowOtpVerification(false);
+          return 300;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const handleOtpChange = (index: number, value: string) => {
+    if (value.length > 1) return;
+    
+    const newOtp = [...otpCode];
+    newOtp[index] = value;
+    setOtpCode(newOtp);
+
+    // Auto-focus next input
+    if (value && index < 5) {
+      const nextInput = document.getElementById(`otp-${index + 1}`);
+      nextInput?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !otpCode[index] && index > 0) {
+      const prevInput = document.getElementById(`otp-${index - 1}`);
+      prevInput?.focus();
+    }
+  };
+
+  const verifyOTP = async () => {
+    const enteredOtp = otpCode.join('');
+    
+    if (enteredOtp.length !== 6) {
+      toast.error('The Force requires all 6 digits of power.');
+      return;
+    }
+
+    if (enteredOtp !== generatedOtp) {
+      toast.error('The Force does not recognize this code.');
       return;
     }
 
@@ -78,18 +147,19 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       const { data, error } = await signUp(signUpData.email, signUpData.password, signUpData.name);
       
       if (error) {
-        toast.error(error.message || 'Failed to create account');
+        toast.error('The dark side rejects your offering. Try again.');
         return;
       }
 
       if (data.user) {
-        toast.success('Account created! Please check your email to verify your account.');
+        toast.success('Verification complete. Welcome to the darkness, young apprentice.');
         onClose();
-        // Reset form
         setSignUpData({ name: '', email: '', password: '', confirmPassword: '' });
+        setOtpCode(['', '', '', '', '', '']);
+        setShowOtpVerification(false);
       }
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('A disturbance in the Force prevents your ascension.');
     } finally {
       setIsLoading(false);
     }
@@ -102,14 +172,13 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       const { error } = await signInWithGoogle();
       
       if (error) {
-        toast.error(error.message || 'Failed to sign in with Google');
+        toast.error('The Empire\'s alliance with Google has failed.');
         return;
       }
 
-      // The redirect will handle the rest
-      toast.success('Redirecting to Google...');
+      toast.success('Redirecting through the Imperial network...');
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('A disturbance in the Force blocks your path.');
     } finally {
       setIsLoading(false);
     }
@@ -123,18 +192,24 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       const { error } = await resetPassword(forgotPasswordEmail);
       
       if (error) {
-        toast.error(error.message || 'Failed to send reset email');
+        toast.error('The dark side cannot locate this email in our archives.');
         return;
       }
 
-      toast.success('Password reset email sent! Check your inbox.');
+      toast.success('A message from the Empire has been sent. Check your communications.');
       setShowForgotPassword(false);
       setForgotPasswordEmail('');
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error('The Force prevents this transmission.');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   if (showForgotPassword) {
@@ -143,22 +218,22 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         <DialogContent className="sm:max-w-md bg-sith-black border-sith-red/30 text-white">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-center sith-text-glow title-font">
-              Reset Password
+              RECOVER YOUR POWER
             </DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleForgotPassword} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="forgot-email" className="text-sith-red">Email</Label>
+              <Label htmlFor="forgot-email" className="text-sith-red font-syncopate">IMPERIAL EMAIL</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-4 w-4 text-sith-red" />
                 <Input
                   id="forgot-email"
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder="Enter your email coordinates"
                   value={forgotPasswordEmail}
                   onChange={(e) => setForgotPasswordEmail(e.target.value)}
-                  className="pl-10 bg-sith-gray/50 border-sith-red/30 text-white"
+                  className="pl-10 bg-sith-gray/50 border-sith-red/30 text-white font-exo"
                   required
                 />
               </div>
@@ -168,16 +243,94 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               <Button
                 type="button"
                 variant="outline"
-                className="flex-1 border-sith-red/30 text-white hover:bg-sith-gray/50"
+                className="flex-1 border-sith-red/30 text-white hover:bg-sith-gray/50 font-syncopate"
                 onClick={() => setShowForgotPassword(false)}
               >
-                Back
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                RETREAT
               </Button>
               <Button type="submit" className="flex-1 sith-button" disabled={isLoading}>
-                {isLoading ? 'Sending...' : 'Send Reset Email'}
+                {isLoading ? 'TRANSMITTING...' : 'SEND IMPERIAL MESSAGE'}
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  if (showOtpVerification) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-md bg-sith-black border-sith-red/30 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-center sith-text-glow title-font">
+              FORCE VERIFICATION
+            </DialogTitle>
+            <p className="text-center text-gray-400 font-exo">
+              The Empire has sent a 6-digit code to {signUpData.email}
+            </p>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            <div className="flex justify-center space-x-2">
+              {otpCode.map((digit, index) => (
+                <input
+                  key={index}
+                  id={`otp-${index}`}
+                  type="text"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleOtpChange(index, e.target.value)}
+                  onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                  className="otp-input"
+                />
+              ))}
+            </div>
+
+            <div className="text-center">
+              <p className="text-sm text-gray-400 font-exo">
+                Time remaining: <span className="text-sith-red font-bold mono-text">{formatTime(otpTimer)}</span>
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1 border-sith-red/30 text-white hover:bg-sith-gray/50 font-syncopate"
+                onClick={() => {
+                  setShowOtpVerification(false);
+                  setOtpCode(['', '', '', '', '', '']);
+                }}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                BACK
+              </Button>
+              <Button 
+                onClick={verifyOTP} 
+                className="flex-1 sith-button" 
+                disabled={isLoading || otpCode.join('').length !== 6}
+              >
+                {isLoading ? 'VERIFYING...' : 'VERIFY FORCE CODE'}
+              </Button>
+            </div>
+
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  const newOtp = generateOTP();
+                  setGeneratedOtp(newOtp);
+                  sendOTPEmail(signUpData.email, newOtp);
+                  setOtpTimer(300);
+                }}
+                className="text-sm text-sith-red hover:text-sith-red-light underline font-exo"
+              >
+                Resend Imperial Code
+              </button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     );
@@ -188,24 +341,24 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       <DialogContent className="sm:max-w-md bg-sith-black border-sith-red/30 text-white">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center sith-text-glow title-font">
-            Join the Empire
+            JOIN THE EMPIRE
           </DialogTitle>
         </DialogHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2 bg-sith-gray/50">
-            <TabsTrigger value="signin" className="data-[state=active]:bg-sith-red data-[state=active]:text-white">
-              Sign In
+            <TabsTrigger value="signin" className="data-[state=active]:bg-sith-red data-[state=active]:text-white font-syncopate">
+              SIGN IN
             </TabsTrigger>
-            <TabsTrigger value="signup" className="data-[state=active]:bg-sith-red data-[state=active]:text-white">
-              Sign Up
+            <TabsTrigger value="signup" className="data-[state=active]:bg-sith-red data-[state=active]:text-white font-syncopate">
+              SIGN UP
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="signin" className="space-y-4">
             <form onSubmit={handleSignIn} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="signin-email" className="text-sith-red">Email</Label>
+                <Label htmlFor="signin-email" className="text-sith-red font-syncopate">IMPERIAL EMAIL</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-sith-red" />
                   <Input
@@ -214,23 +367,23 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                     placeholder="your.email@empire.galaxy"
                     value={signInData.email}
                     onChange={(e) => setSignInData({ ...signInData, email: e.target.value })}
-                    className="pl-10 bg-sith-gray/50 border-sith-red/30 text-white"
+                    className="pl-10 bg-sith-gray/50 border-sith-red/30 text-white font-exo"
                     required
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="signin-password" className="text-sith-red">Password</Label>
+                <Label htmlFor="signin-password" className="text-sith-red font-syncopate">DARK SIDE PASSWORD</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-sith-red" />
                   <Input
                     id="signin-password"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter your password"
+                    placeholder="Enter your secret power"
                     value={signInData.password}
                     onChange={(e) => setSignInData({ ...signInData, password: e.target.value })}
-                    className="pl-10 pr-10 bg-sith-gray/50 border-sith-red/30 text-white"
+                    className="pl-10 pr-10 bg-sith-gray/50 border-sith-red/30 text-white font-exo"
                     required
                   />
                   <button
@@ -247,14 +400,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 <button
                   type="button"
                   onClick={() => setShowForgotPassword(true)}
-                  className="text-sm text-sith-red hover:text-sith-red-light underline"
+                  className="text-sm text-sith-red hover:text-sith-red-light underline font-exo"
                 >
-                  Forgot password?
+                  Lost your power?
                 </button>
               </div>
 
               <Button type="submit" className="w-full sith-button" disabled={isLoading}>
-                {isLoading ? 'Authenticating...' : 'Enter the Empire'}
+                {isLoading ? 'AUTHENTICATING...' : 'ENTER THE EMPIRE'}
               </Button>
             </form>
 
@@ -263,14 +416,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 <span className="w-full border-t border-sith-red/30" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-sith-black px-2 text-gray-400">Or continue with</span>
+                <span className="bg-sith-black px-2 text-gray-400 font-syncopate">OR CONTINUE WITH</span>
               </div>
             </div>
 
             <Button
               type="button"
               variant="outline"
-              className="w-full border-sith-red/30 text-white hover:bg-sith-gray/50"
+              className="w-full border-sith-red/30 text-white hover:bg-sith-gray/50 font-syncopate"
               onClick={handleGoogleSignIn}
               disabled={isLoading}
             >
@@ -292,30 +445,30 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              Continue with Google
+              IMPERIAL GOOGLE ACCESS
             </Button>
           </TabsContent>
 
           <TabsContent value="signup" className="space-y-4">
             <form onSubmit={handleSignUp} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="signup-name" className="text-sith-red">Name</Label>
+                <Label htmlFor="signup-name" className="text-sith-red font-syncopate">SITH NAME</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-3 h-4 w-4 text-sith-red" />
                   <Input
                     id="signup-name"
                     type="text"
-                    placeholder="Your Sith name"
+                    placeholder="Your dark identity"
                     value={signUpData.name}
                     onChange={(e) => setSignUpData({ ...signUpData, name: e.target.value })}
-                    className="pl-10 bg-sith-gray/50 border-sith-red/30 text-white"
+                    className="pl-10 bg-sith-gray/50 border-sith-red/30 text-white font-exo"
                     required
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="signup-email" className="text-sith-red">Email</Label>
+                <Label htmlFor="signup-email" className="text-sith-red font-syncopate">IMPERIAL EMAIL</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-3 h-4 w-4 text-sith-red" />
                   <Input
@@ -324,23 +477,23 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                     placeholder="your.email@empire.galaxy"
                     value={signUpData.email}
                     onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })}
-                    className="pl-10 bg-sith-gray/50 border-sith-red/30 text-white"
+                    className="pl-10 bg-sith-gray/50 border-sith-red/30 text-white font-exo"
                     required
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="signup-password" className="text-sith-red">Password</Label>
+                <Label htmlFor="signup-password" className="text-sith-red font-syncopate">DARK SIDE PASSWORD</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-3 h-4 w-4 text-sith-red" />
                   <Input
                     id="signup-password"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Create a strong password"
+                    placeholder="Forge your secret power"
                     value={signUpData.password}
                     onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })}
-                    className="pl-10 pr-10 bg-sith-gray/50 border-sith-red/30 text-white"
+                    className="pl-10 pr-10 bg-sith-gray/50 border-sith-red/30 text-white font-exo"
                     required
                   />
                   <button
@@ -354,16 +507,16 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="signup-confirm-password" className="text-sith-red">Confirm Password</Label>
+                <Label htmlFor="signup-confirm-password" className="text-sith-red font-syncopate">CONFIRM POWER</Label>
                 <div className="relative">
                   <Shield className="absolute left-3 top-3 h-4 w-4 text-sith-red" />
                   <Input
                     id="signup-confirm-password"
                     type={showConfirmPassword ? 'text' : 'password'}
-                    placeholder="Confirm your password"
+                    placeholder="Confirm your secret power"
                     value={signUpData.confirmPassword}
                     onChange={(e) => setSignUpData({ ...signUpData, confirmPassword: e.target.value })}
-                    className="pl-10 pr-10 bg-sith-gray/50 border-sith-red/30 text-white"
+                    className="pl-10 pr-10 bg-sith-gray/50 border-sith-red/30 text-white font-exo"
                     required
                   />
                   <button
@@ -377,7 +530,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               </div>
 
               <Button type="submit" className="w-full sith-button" disabled={isLoading}>
-                {isLoading ? 'Creating Account...' : 'Join the Dark Side'}
+                {isLoading ? 'PREPARING VERIFICATION...' : 'JOIN THE DARK SIDE'}
               </Button>
             </form>
 
@@ -386,14 +539,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 <span className="w-full border-t border-sith-red/30" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-sith-black px-2 text-gray-400">Or continue with</span>
+                <span className="bg-sith-black px-2 text-gray-400 font-syncopate">OR CONTINUE WITH</span>
               </div>
             </div>
 
             <Button
               type="button"
               variant="outline"
-              className="w-full border-sith-red/30 text-white hover:bg-sith-gray/50"
+              className="w-full border-sith-red/30 text-white hover:bg-sith-gray/50 font-syncopate"
               onClick={handleGoogleSignIn}
               disabled={isLoading}
             >
@@ -415,7 +568,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              Continue with Google
+              IMPERIAL GOOGLE ACCESS
             </Button>
           </TabsContent>
         </Tabs>
