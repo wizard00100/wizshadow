@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Eye, EyeOff, Mail, Lock, User, Shield, ArrowLeft, Clock, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Shield, ArrowLeft } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { signUp, signIn, signInWithGoogle, resetPassword } from '@/lib/supabase';
 
@@ -19,13 +19,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [showOtpVerification, setShowOtpVerification] = useState(false);
-  const [otpCode, setOtpCode] = useState(['', '', '', '', '', '']);
-  const [otpTimer, setOtpTimer] = useState(300); // 5 minutes
-  const [canResendOtp, setCanResendOtp] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(0);
-  const [otpAttempts, setOtpAttempts] = useState(0);
-  const [emailServiceAvailable, setEmailServiceAvailable] = useState(true);
   
   const [signInData, setSignInData] = useState({
     email: '',
@@ -41,128 +34,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
 
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
 
-  // Timer effects
-  React.useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (showOtpVerification && otpTimer > 0) {
-      interval = setInterval(() => {
-        setOtpTimer(prev => {
-          if (prev <= 1) {
-            setCanResendOtp(true);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [showOtpVerification, otpTimer]);
-
-  React.useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (resendCooldown > 0) {
-      interval = setInterval(() => {
-        setResendCooldown(prev => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [resendCooldown]);
-
-  // Test email service availability on component mount
-  React.useEffect(() => {
-    const testEmailService = async () => {
-      try {
-        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-otp`, {
-          method: 'OPTIONS',
-          headers: {
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          },
-        });
-        
-        if (!response.ok && response.status !== 404) {
-          console.warn('Email service may not be available');
-          setEmailServiceAvailable(false);
-        }
-      } catch (error) {
-        console.warn('Email service test failed:', error);
-        setEmailServiceAvailable(false);
-      }
-    };
-
-    if (isOpen) {
-      testEmailService();
-    }
-  }, [isOpen]);
-
-  const sendOTP = async (email: string, name: string, type: 'signup' | 'reset' = 'signup') => {
-    try {
-      console.log('Attempting to send OTP to:', email);
-      
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-otp`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, name, type }),
-      });
-
-      console.log('OTP send response status:', response.status);
-      
-      const data = await response.json();
-      console.log('OTP send response data:', data);
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Email service not deployed. Please contact support.');
-        }
-        throw new Error(data.error || 'Failed to send OTP');
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Error sending OTP:', error);
-      throw error;
-    }
-  };
-
-  const verifyOTP = async (email: string, otp: string) => {
-    try {
-      console.log('Attempting to verify OTP for:', email);
-      
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-otp`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, otp }),
-      });
-
-      console.log('OTP verify response status:', response.status);
-      
-      const data = await response.json();
-      console.log('OTP verify response data:', data);
-
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Email verification service not available. Please contact support.');
-        }
-        throw new Error(data.error || 'Failed to verify OTP');
-      }
-
-      return data;
-    } catch (error) {
-      console.error('Error verifying OTP:', error);
-      throw error;
-    }
-  };
-
-  // Mock OTP generation for fallback
-  const generateMockOTP = () => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
-  };
-
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -171,16 +42,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       const { data, error } = await signIn(signInData.email, signInData.password);
       
       if (error) {
-        // Handle specific error cases
-        if (error.message === 'Invalid login credentials') {
-          toast.error('Invalid email or password. Please double-check your credentials and ensure your email is verified if you recently signed up.');
-        } else if (error.message.includes('Email not confirmed')) {
-          toast.error('Please check your email and click the verification link before signing in.');
-        } else if (error.message.includes('Too many requests')) {
-          toast.error('Too many login attempts. Please wait a moment before trying again.');
-        } else {
-          toast.error(`Authentication failed: ${error.message}`);
-        }
+        toast.error('The dark side rejects your credentials. Try again.');
         return;
       }
 
@@ -190,8 +52,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         setSignInData({ email: '', password: '' });
       }
     } catch (error) {
-      console.error('Sign in error:', error);
-      toast.error('The Force disturbance prevents your entry. Please try again.');
+      toast.error('The Force disturbance prevents your entry.');
     } finally {
       setIsLoading(false);
     }
@@ -211,198 +72,22 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     }
 
     setIsLoading(true);
-
-    try {
-      // Check if email service is available
-      if (!emailServiceAvailable) {
-        // Fallback: Skip OTP verification and create account directly
-        toast.info('Email verification temporarily unavailable. Creating account directly...');
-        
-        const { data, error } = await signUp(signUpData.email, signUpData.password, signUpData.name);
-        
-        if (error) {
-          if (error.message.includes('already registered')) {
-            toast.error('This email is already registered. Try signing in instead.');
-          } else if (error.message.includes('Password should be')) {
-            toast.error('Password does not meet requirements. Please choose a stronger password.');
-          } else {
-            toast.error(`Registration failed: ${error.message}`);
-          }
-          return;
-        }
-
-        if (data.user) {
-          toast.success('Account created successfully! Welcome to the Empire, young apprentice.');
-          onClose();
-          setSignUpData({ name: '', email: '', password: '', confirmPassword: '' });
-        }
-        return;
-      }
-
-      // Try to send OTP
-      try {
-        await sendOTP(signUpData.email, signUpData.name, 'signup');
-        
-        toast.success(`Verification code sent to ${signUpData.email}. Check your inbox!`);
-        setShowOtpVerification(true);
-        setOtpTimer(300); // 5 minutes
-        setCanResendOtp(false);
-        setOtpAttempts(0);
-      } catch (otpError: any) {
-        console.error('OTP send failed:', otpError);
-        
-        // If OTP service fails, offer fallback options
-        if (otpError.message.includes('not deployed') || otpError.message.includes('service not')) {
-          toast.error('Email verification service is not available. Please contact support or try again later.');
-          return;
-        } else if (otpError.message.includes('wait 30 seconds')) {
-          toast.error('Please wait 30 seconds before requesting another verification code.');
-          return;
-        } else {
-          // For other errors, offer to proceed without verification
-          toast.error('Failed to send verification email. Would you like to proceed without email verification?');
-          
-          // Show option to proceed without verification
-          const proceed = confirm('Email verification failed. Would you like to create your account without email verification? (You can verify later)');
-          
-          if (proceed) {
-            const { data, error } = await signUp(signUpData.email, signUpData.password, signUpData.name);
-            
-            if (error) {
-              toast.error(`Registration failed: ${error.message}`);
-              return;
-            }
-
-            if (data.user) {
-              toast.success('Account created successfully! Please verify your email when possible.');
-              onClose();
-              setSignUpData({ name: '', email: '', password: '', confirmPassword: '' });
-            }
-          }
-          return;
-        }
-      }
-    } catch (error: any) {
-      console.error('Signup error:', error);
-      toast.error('Registration failed. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleOtpChange = (index: number, value: string) => {
-    if (value.length > 1) return;
-    
-    const newOtp = [...otpCode];
-    newOtp[index] = value;
-    setOtpCode(newOtp);
-
-    // Auto-focus next input
-    if (value && index < 5) {
-      const nextInput = document.getElementById(`otp-${index + 1}`);
-      nextInput?.focus();
-    }
-  };
-
-  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === 'Backspace' && !otpCode[index] && index > 0) {
-      const prevInput = document.getElementById(`otp-${index - 1}`);
-      prevInput?.focus();
-    }
-  };
-
-  const handleVerifyOTP = async () => {
-    const enteredOtp = otpCode.join('');
-    
-    if (enteredOtp.length !== 6) {
-      toast.error('Please enter all 6 digits of the verification code.');
-      return;
-    }
-
-    setIsLoading(true);
     
     try {
-      // Verify OTP first
-      await verifyOTP(signUpData.email, enteredOtp);
-      
-      // If OTP is valid, create the account
       const { data, error } = await signUp(signUpData.email, signUpData.password, signUpData.name);
       
       if (error) {
-        if (error.message.includes('already registered')) {
-          toast.error('This email is already registered. Try signing in instead.');
-        } else if (error.message.includes('Password should be')) {
-          toast.error('Password does not meet requirements. Please choose a stronger password.');
-        } else {
-          toast.error(`Registration failed: ${error.message}`);
-        }
+        toast.error('The dark side rejects your offering. Try again.');
         return;
       }
 
       if (data.user) {
-        toast.success('Account created successfully! Welcome to the Empire, young apprentice.');
+        toast.success('Welcome to the darkness, young apprentice!');
         onClose();
         setSignUpData({ name: '', email: '', password: '', confirmPassword: '' });
-        setOtpCode(['', '', '', '', '', '']);
-        setShowOtpVerification(false);
       }
-    } catch (error: any) {
-      console.error('OTP verification error:', error);
-      setOtpAttempts(prev => prev + 1);
-      
-      if (error.message.includes('Invalid OTP')) {
-        toast.error(error.message);
-      } else if (error.message.includes('expired')) {
-        toast.error('Verification code has expired. Please request a new one.');
-        setShowOtpVerification(false);
-      } else if (error.message.includes('Too many failed attempts')) {
-        toast.error('Too many failed attempts. Please request a new verification code.');
-        setShowOtpVerification(false);
-      } else if (error.message.includes('not available')) {
-        toast.error('Verification service unavailable. Creating account without verification...');
-        
-        // Fallback: Create account without verification
-        try {
-          const { data, error } = await signUp(signUpData.email, signUpData.password, signUpData.name);
-          
-          if (error) {
-            toast.error(`Registration failed: ${error.message}`);
-            return;
-          }
-
-          if (data.user) {
-            toast.success('Account created successfully! Email verification can be completed later.');
-            onClose();
-            setSignUpData({ name: '', email: '', password: '', confirmPassword: '' });
-            setOtpCode(['', '', '', '', '', '']);
-            setShowOtpVerification(false);
-          }
-        } catch (fallbackError) {
-          toast.error('Account creation failed. Please try again.');
-        }
-      } else {
-        toast.error('Verification failed. Please try again.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleResendOTP = async () => {
-    if (resendCooldown > 0) return;
-
-    setIsLoading(true);
-    try {
-      await sendOTP(signUpData.email, signUpData.name, 'signup');
-      toast.success('New verification code sent!');
-      setOtpTimer(300);
-      setCanResendOtp(false);
-      setResendCooldown(30);
-      setOtpCode(['', '', '', '', '', '']);
-      setOtpAttempts(0);
-    } catch (error: any) {
-      console.error('Error resending OTP:', error);
-      toast.error('Failed to resend verification code. Please try again.');
+    } catch (error) {
+      toast.error('A disturbance in the Force prevents your ascension.');
     } finally {
       setIsLoading(false);
     }
@@ -415,17 +100,12 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       const { error } = await signInWithGoogle();
       
       if (error) {
-        if (error.message.includes('popup')) {
-          toast.error('Google sign-in popup was blocked. Please allow popups and try again.');
-        } else {
-          toast.error(`Google sign-in failed: ${error.message}`);
-        }
+        toast.error('The Empire\'s alliance with Google has failed.');
         return;
       }
 
       toast.success('Redirecting through the Imperial network...');
     } catch (error) {
-      console.error('Google sign in error:', error);
       toast.error('A disturbance in the Force blocks your path.');
     } finally {
       setIsLoading(false);
@@ -440,13 +120,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       const { error } = await resetPassword(forgotPasswordEmail);
       
       if (error) {
-        if (error.message.includes('not found')) {
-          toast.error('No account found with this email address.');
-        } else if (error.message.includes('rate limit')) {
-          toast.error('Too many password reset requests. Please wait before trying again.');
-        } else {
-          toast.error(`Password reset failed: ${error.message}`);
-        }
+        toast.error('The dark side cannot locate this email in our archives.');
         return;
       }
 
@@ -454,17 +128,10 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       setShowForgotPassword(false);
       setForgotPasswordEmail('');
     } catch (error) {
-      console.error('Password reset error:', error);
       toast.error('The Force prevents this transmission.');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   if (showForgotPassword) {
@@ -509,123 +176,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               </Button>
             </div>
           </form>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
-  if (showOtpVerification) {
-    return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-md bg-sith-black border-sith-red/30 text-white">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-center sith-text-glow title-font">
-              FORCE VERIFICATION
-            </DialogTitle>
-            <p className="text-center text-gray-400 font-exo">
-              A verification code has been sent to {signUpData.email}
-            </p>
-          </DialogHeader>
-
-          <div className="space-y-6">
-            <div className="flex justify-center space-x-2">
-              {otpCode.map((digit, index) => (
-                <input
-                  key={index}
-                  id={`otp-${index}`}
-                  type="text"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleOtpChange(index, e.target.value)}
-                  onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                  className="otp-input"
-                />
-              ))}
-            </div>
-
-            <div className="text-center space-y-2">
-              <div className="flex items-center justify-center space-x-2">
-                <Clock className="h-4 w-4 text-sith-red" />
-                <span className="text-sm text-gray-400 font-exo">
-                  Time remaining: <span className="text-sith-red font-bold mono-text">{formatTime(otpTimer)}</span>
-                </span>
-              </div>
-              
-              {otpAttempts > 0 && (
-                <p className="text-xs text-yellow-400 font-exo">
-                  Attempts remaining: {3 - otpAttempts}
-                </p>
-              )}
-            </div>
-
-            <div className="flex gap-3">
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1 border-sith-red/30 text-white hover:bg-sith-gray/50 font-syncopate"
-                onClick={() => {
-                  setShowOtpVerification(false);
-                  setOtpCode(['', '', '', '', '', '']);
-                }}
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                BACK
-              </Button>
-              <Button 
-                onClick={handleVerifyOTP} 
-                className="flex-1 sith-button" 
-                disabled={isLoading || otpCode.join('').length !== 6}
-              >
-                {isLoading ? 'VERIFYING...' : 'VERIFY CODE'}
-              </Button>
-            </div>
-
-            <div className="text-center">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={handleResendOTP}
-                disabled={!canResendOtp || resendCooldown > 0 || isLoading}
-                className="text-sm text-sith-red hover:text-sith-red-light font-exo"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                {resendCooldown > 0 
-                  ? `Resend in ${resendCooldown}s` 
-                  : canResendOtp 
-                    ? 'Resend Code' 
-                    : 'Resend Available Soon'
-                }
-              </Button>
-            </div>
-
-            {!emailServiceAvailable && (
-              <div className="p-3 bg-yellow-600/10 border border-yellow-600/30 rounded text-center">
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <AlertTriangle className="h-4 w-4 text-yellow-400" />
-                  <span className="text-sm font-bold text-yellow-400 font-syncopate">SERVICE NOTICE</span>
-                </div>
-                <p className="text-xs text-gray-300 font-exo">
-                  Email verification service is temporarily unavailable. You can proceed without verification.
-                </p>
-                <Button
-                  onClick={() => {
-                    setShowOtpVerification(false);
-                    handleSignUp(new Event('submit') as any);
-                  }}
-                  variant="outline"
-                  className="mt-2 text-xs border-yellow-600/30 text-yellow-400 hover:bg-yellow-600/10"
-                >
-                  Proceed Without Verification
-                </Button>
-              </div>
-            )}
-
-            <div className="p-3 bg-sith-red/10 border border-sith-red/30 rounded text-center">
-              <p className="text-xs text-gray-300 font-exo">
-                Didn't receive the code? Check your spam folder or try resending.
-              </p>
-            </div>
-          </div>
         </DialogContent>
       </Dialog>
     );
@@ -745,18 +295,6 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           </TabsContent>
 
           <TabsContent value="signup" className="space-y-4">
-            {!emailServiceAvailable && (
-              <div className="p-3 bg-yellow-600/10 border border-yellow-600/30 rounded">
-                <div className="flex items-center space-x-2 mb-2">
-                  <AlertTriangle className="h-4 w-4 text-yellow-400" />
-                  <span className="text-sm font-bold text-yellow-400 font-syncopate">NOTICE</span>
-                </div>
-                <p className="text-xs text-gray-300 font-exo">
-                  Email verification is temporarily unavailable. Accounts will be created without email verification.
-                </p>
-              </div>
-            )}
-
             <form onSubmit={handleSignUp} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="signup-name" className="text-sith-red font-syncopate">SITH NAME</Label>
@@ -837,7 +375,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               </div>
 
               <Button type="submit" className="w-full sith-button" disabled={isLoading}>
-                {isLoading ? (emailServiceAvailable ? 'SENDING VERIFICATION...' : 'CREATING ACCOUNT...') : 'JOIN THE DARK SIDE'}
+                {isLoading ? 'CREATING ACCOUNT...' : 'JOIN THE DARK SIDE'}
               </Button>
             </form>
 
