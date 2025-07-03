@@ -4,18 +4,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import StarField from '@/components/StarField';
 import AuthModal from '@/components/auth/AuthModal';
 import BookingModal from '@/components/booking/BookingModal';
 import { toast } from '@/components/ui/sonner';
+import { useAuth } from '@/hooks/useAuth';
+import { signOut } from '@/lib/supabase';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [user, setUser] = useState<any>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedDestination, setSelectedDestination] = useState<any>(null);
+  
+  const { user, loading } = useAuth();
 
   const destinations = [
     {
@@ -116,14 +119,17 @@ const Index = () => {
     }
   ];
 
-  const handleAuthSuccess = (userData: any) => {
-    setUser(userData);
-    setShowAuthModal(false);
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-    toast.success('May the Force be with you on your next journey');
+  const handleLogout = async () => {
+    try {
+      const { error } = await signOut();
+      if (error) {
+        toast.error('Failed to sign out');
+        return;
+      }
+      toast.success('May the Force be with you on your next journey');
+    } catch (error) {
+      toast.error('An unexpected error occurred');
+    }
   };
 
   const handleBookDestination = (destination: any) => {
@@ -135,6 +141,32 @@ const Index = () => {
     setSelectedDestination(destination);
     setShowBookingModal(true);
   };
+
+  const getUserDisplayName = () => {
+    if (!user) return '';
+    return user.user_metadata?.full_name || user.email?.split('@')[0] || 'Sith Acolyte';
+  };
+
+  const getUserRank = () => {
+    if (!user) return '';
+    return user.user_metadata?.rank || 'Sith Acolyte';
+  };
+
+  const getUserInitials = () => {
+    const name = getUserDisplayName();
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-sith-black flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-sith-red border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-sith-red text-lg">Awakening the Force...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-sith-black overflow-x-hidden relative">
@@ -158,8 +190,9 @@ const Index = () => {
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                       <Avatar className="h-8 w-8 border border-sith-red/30">
+                        <AvatarImage src={user.user_metadata?.avatar_url} />
                         <AvatarFallback className="bg-sith-red text-white">
-                          {user.name.charAt(0)}
+                          {getUserInitials()}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
@@ -168,8 +201,8 @@ const Index = () => {
                     <DropdownMenuItem className="text-white hover:bg-sith-gray/50">
                       <User className="mr-2 h-4 w-4" />
                       <div className="flex flex-col">
-                        <span>{user.name}</span>
-                        <span className="text-xs text-sith-red">{user.rank}</span>
+                        <span>{getUserDisplayName()}</span>
+                        <span className="text-xs text-sith-red">{getUserRank()}</span>
                       </div>
                     </DropdownMenuItem>
                     <DropdownMenuItem 
@@ -460,7 +493,6 @@ const Index = () => {
       <AuthModal 
         isOpen={showAuthModal} 
         onClose={() => setShowAuthModal(false)}
-        onAuthSuccess={handleAuthSuccess}
       />
       
       <BookingModal
