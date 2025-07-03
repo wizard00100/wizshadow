@@ -10,7 +10,43 @@ export const useAuth = () => {
     // Get initial session
     const getInitialSession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      setUser(session?.user ?? null)
+      
+      // Check for local subscription data and update user metadata if needed
+      if (session?.user) {
+        const localSubscription = localStorage.getItem('sith-subscription');
+        if (localSubscription) {
+          const subData = JSON.parse(localSubscription);
+          
+          // Update user metadata if rank has changed
+          if (session.user.user_metadata?.rank !== subData.tier) {
+            const { error } = await supabase.auth.updateUser({
+              data: {
+                ...session.user.user_metadata,
+                rank: subData.tier,
+                subscription_tier: subData.tier.toLowerCase(),
+                subscription_type: subData.plan,
+                subscription_start: subData.startDate,
+                subscription_end: subData.endDate
+              }
+            });
+            
+            if (!error) {
+              // Refresh session to get updated user data
+              const { data: { session: updatedSession } } = await supabase.auth.getSession();
+              setUser(updatedSession?.user ?? null);
+            } else {
+              setUser(session.user);
+            }
+          } else {
+            setUser(session.user);
+          }
+        } else {
+          setUser(session.user);
+        }
+      } else {
+        setUser(null);
+      }
+      
       setLoading(false)
     }
 
@@ -19,14 +55,43 @@ export const useAuth = () => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        setUser(session?.user ?? null)
-        setLoading(false)
-        
-        if (event === 'SIGNED_IN') {
-          console.log('User signed in:', session?.user)
+        if (event === 'SIGNED_IN' && session?.user) {
+          // Check for local subscription data on sign in
+          const localSubscription = localStorage.getItem('sith-subscription');
+          if (localSubscription) {
+            const subData = JSON.parse(localSubscription);
+            
+            // Update user metadata with subscription info
+            const { error } = await supabase.auth.updateUser({
+              data: {
+                ...session.user.user_metadata,
+                rank: subData.tier,
+                subscription_tier: subData.tier.toLowerCase(),
+                subscription_type: subData.plan,
+                subscription_start: subData.startDate,
+                subscription_end: subData.endDate
+              }
+            });
+            
+            if (!error) {
+              // Refresh session to get updated user data
+              const { data: { session: updatedSession } } = await supabase.auth.getSession();
+              setUser(updatedSession?.user ?? null);
+            } else {
+              setUser(session.user);
+            }
+          } else {
+            setUser(session.user);
+          }
         } else if (event === 'SIGNED_OUT') {
-          console.log('User signed out')
+          setUser(null);
+          // Clear local subscription data on sign out
+          localStorage.removeItem('sith-subscription');
+        } else {
+          setUser(session?.user ?? null);
         }
+        
+        setLoading(false)
       }
     )
 

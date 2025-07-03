@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, CreditCard, Smartphone, Coins, Shield, Check, X } from 'lucide-react';
+import { ArrowLeft, CreditCard, Smartphone, Coins, Shield, Check, Crown, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { subscriptionTiers, SubscriptionTier } from '@/data/subscriptionTiers';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/components/ui/sonner';
 import StarField from '@/components/StarField';
+import { supabase } from '@/lib/supabase';
 
 const PaymentPortal = () => {
   const navigate = useNavigate();
@@ -22,6 +22,7 @@ const PaymentPortal = () => {
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [paymentStep, setPaymentStep] = useState<'payment' | 'processing' | 'success'>('payment');
   
   const [cardData, setCardData] = useState({
     number: '',
@@ -41,7 +42,7 @@ const PaymentPortal = () => {
   });
 
   useEffect(() => {
-    // Get tier from URL params or state
+    // Get tier from URL params
     const params = new URLSearchParams(location.search);
     const tierId = params.get('tier');
     const yearly = params.get('yearly') === 'true';
@@ -120,46 +121,98 @@ const PaymentPortal = () => {
     return true;
   };
 
+  const updateUserRank = async (newRank: string) => {
+    if (!user) return false;
+
+    try {
+      // Update user metadata in Supabase
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          ...user.user_metadata,
+          rank: newRank,
+          subscription_tier: selectedTier?.id,
+          subscription_type: isYearly ? 'yearly' : 'monthly',
+          subscription_start: new Date().toISOString(),
+          subscription_end: new Date(Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000).toISOString()
+        }
+      });
+
+      if (error) {
+        console.error('Error updating user rank:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error updating user rank:', error);
+      return false;
+    }
+  };
+
   const processPayment = async () => {
-    if (!validatePayment() || !selectedTier) return;
+    if (!validatePayment() || !selectedTier || !user) return;
 
     setIsProcessing(true);
-    
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    setPaymentStep('processing');
     
     try {
-      // Mock payment success
-      const paymentSuccess = Math.random() > 0.1; // 90% success rate
+      // Simulate payment processing with realistic delay
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Mock payment success (90% success rate)
+      const paymentSuccess = Math.random() > 0.1;
       
       if (paymentSuccess) {
-        // Store subscription in localStorage (mock)
-        const subscriptionData = {
-          tier: selectedTier.rank,
-          plan: isYearly ? 'yearly' : 'monthly',
-          price: isYearly ? selectedTier.yearlyPrice : selectedTier.monthlyPrice,
-          startDate: new Date().toISOString(),
-          endDate: new Date(Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000).toISOString(),
-          paymentMethod
-        };
+        // Update user rank in Supabase
+        const rankUpdateSuccess = await updateUserRank(selectedTier.rank);
         
-        localStorage.setItem('sith-subscription', JSON.stringify(subscriptionData));
-        
-        setShowSuccess(true);
-        toast.success('Payment successful! Your ascension to the dark side is complete.');
-        
-        // Redirect after success animation
-        setTimeout(() => {
-          navigate('/', { state: { subscriptionSuccess: true } });
-        }, 3000);
+        if (rankUpdateSuccess) {
+          // Store subscription data locally as backup
+          const subscriptionData = {
+            tier: selectedTier.rank,
+            plan: isYearly ? 'yearly' : 'monthly',
+            price: isYearly ? selectedTier.yearlyPrice : selectedTier.monthlyPrice,
+            startDate: new Date().toISOString(),
+            endDate: new Date(Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000).toISOString(),
+            paymentMethod,
+            subscriptionId: `SITH-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+          };
+          
+          localStorage.setItem('sith-subscription', JSON.stringify(subscriptionData));
+          
+          setPaymentStep('success');
+          toast.success('Payment successful! Your ascension to the dark side is complete.');
+          
+          // Redirect after success animation
+          setTimeout(() => {
+            navigate('/', { 
+              state: { 
+                subscriptionSuccess: true, 
+                newRank: selectedTier.rank,
+                userName: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Apprentice'
+              } 
+            });
+          }, 4000);
+        } else {
+          toast.error('Payment successful but rank update failed. Contact Imperial support.');
+          setIsProcessing(false);
+          setPaymentStep('payment');
+        }
       } else {
         toast.error('The Force rejects your offering. Payment failed.');
+        setIsProcessing(false);
+        setPaymentStep('payment');
       }
     } catch (error) {
       toast.error('A disturbance in the Force prevents your transaction.');
-    } finally {
       setIsProcessing(false);
+      setPaymentStep('payment');
     }
+  };
+
+  const getUserDisplayName = () => {
+    if (!user) return 'Apprentice';
+    return user.user_metadata?.full_name || user.email?.split('@')[0] || 'Apprentice';
   };
 
   if (!selectedTier) {
@@ -167,7 +220,7 @@ const PaymentPortal = () => {
       <div className="min-h-screen bg-sith-black flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-sith-red border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-sith-red text-lg font-orbitron">Loading Imperial Payment Portal...</p>
+          <p className="text-sith-red text-lg title-font">LOADING IMPERIAL PAYMENT PORTAL...</p>
         </div>
       </div>
     );
@@ -178,28 +231,151 @@ const PaymentPortal = () => {
     ? (selectedTier.monthlyPrice * 12 - selectedTier.yearlyPrice) 
     : 0;
 
-  if (showSuccess) {
+  // Processing Animation
+  if (paymentStep === 'processing') {
     return (
       <div className="min-h-screen bg-sith-black relative flex items-center justify-center">
         <StarField />
         <div className="relative z-10 text-center">
-          <div className="w-32 h-32 mx-auto mb-8 bg-green-600 rounded-full flex items-center justify-center animate-pulse-glow">
-            <Check className="h-16 w-16 text-white" />
+          <div className="w-32 h-32 mx-auto mb-8 relative">
+            <div className="absolute inset-0 border-4 border-sith-red/30 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-sith-red border-t-transparent rounded-full animate-spin"></div>
+            <div className="absolute inset-4 bg-sith-red/20 rounded-full flex items-center justify-center animate-pulse-glow">
+              <CreditCard className="h-8 w-8 text-sith-red" />
+            </div>
           </div>
-          <h1 className="text-4xl font-bold mb-4 sith-text-glow title-font">
-            ASCENSION COMPLETE
+          <h1 className="text-3xl font-bold mb-4 sith-text-glow title-font">
+            PROCESSING SACRIFICE
           </h1>
           <p className="text-xl text-gray-300 mb-6 font-exo">
-            Welcome to the {selectedTier.rank} rank, my apprentice.
+            The Empire is validating your offering...
           </p>
-          <p className="text-sith-red font-syncopate">
-            Your power grows stronger...
+          <div className="flex justify-center space-x-2 mb-4">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className="w-2 h-2 bg-sith-red rounded-full animate-bounce"
+                style={{ animationDelay: `${i * 0.2}s` }}
+              ></div>
+            ))}
+          </div>
+          <p className="text-sm text-gray-500 font-exo">
+            Do not close this portal or the Force will be disturbed...
           </p>
         </div>
       </div>
     );
   }
 
+  // Success Animation with Rank Confirmation
+  if (paymentStep === 'success') {
+    return (
+      <div className="min-h-screen bg-sith-black relative flex items-center justify-center overflow-hidden">
+        <StarField />
+        
+        {/* Matrix Rain Effect */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute text-sith-red text-xs font-mono opacity-30 animate-matrix-rain"
+              style={{
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${3 + Math.random() * 2}s`
+              }}
+            >
+              {Array.from({ length: 20 }, () => Math.random() > 0.5 ? '1' : '0').join('')}
+            </div>
+          ))}
+        </div>
+
+        <div className="relative z-10 text-center max-w-2xl mx-auto px-4">
+          {/* Success Icon */}
+          <div className="w-40 h-40 mx-auto mb-8 relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-green-400 rounded-full animate-pulse-glow"></div>
+            <div className="absolute inset-2 bg-sith-black rounded-full flex items-center justify-center">
+              <Check className="h-20 w-20 text-green-400" />
+            </div>
+            <div className="absolute -top-4 -right-4 w-16 h-16 bg-sith-red rounded-full flex items-center justify-center animate-bounce">
+              <Crown className="h-8 w-8 text-white" />
+            </div>
+          </div>
+
+          {/* Success Message */}
+          <h1 className="text-5xl font-bold mb-6 sith-text-glow title-font animate-pulse">
+            ASCENSION COMPLETE
+          </h1>
+          
+          <div className="mb-8 p-6 bg-sith-gray/30 rounded-xl border border-sith-red/30 holographic">
+            <p className="text-2xl text-sith-red mb-4 planet-name">
+              "You are now one with the Dark Side,"
+            </p>
+            <p className="text-3xl font-bold text-yellow-400 mb-2 title-font">
+              {selectedTier.rank} {getUserDisplayName().toUpperCase()}
+            </p>
+            <p className="text-lg text-gray-300 font-exo">
+              Your transformation is complete. Feel the power flow through you.
+            </p>
+          </div>
+
+          {/* New Powers Unlocked */}
+          <div className="mb-8">
+            <h3 className="text-xl font-bold text-sith-red mb-4 font-syncopate">
+              NEW POWERS UNLOCKED:
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {selectedTier.perks.slice(0, 4).map((perk, index) => (
+                <div 
+                  key={index} 
+                  className="flex items-center space-x-2 p-2 bg-sith-red/10 rounded border border-sith-red/30"
+                  style={{ animationDelay: `${index * 0.2}s` }}
+                >
+                  <Zap className="h-4 w-4 text-yellow-400 animate-pulse" />
+                  <span className="text-sm text-gray-300 font-exo">{perk}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Subscription Details */}
+          <div className="mb-8 p-4 bg-sith-gray/20 rounded-lg border border-sith-red/20">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-gray-400 font-exo">Rank:</span>
+                <span className="text-sith-red font-bold ml-2 font-syncopate">{selectedTier.rank}</span>
+              </div>
+              <div>
+                <span className="text-gray-400 font-exo">Plan:</span>
+                <span className="text-white ml-2 font-exo">{isYearly ? 'Yearly' : 'Monthly'}</span>
+              </div>
+              <div>
+                <span className="text-gray-400 font-exo">Amount:</span>
+                <span className="text-green-400 font-bold ml-2 mono-text">₹{price.toLocaleString()}</span>
+              </div>
+              <div>
+                <span className="text-gray-400 font-exo">Next Billing:</span>
+                <span className="text-white ml-2 mono-text">
+                  {new Date(Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-sith-red font-syncopate animate-pulse">
+              YOUR JOURNEY TO THE DARK SIDE CONTINUES...
+            </p>
+            <p className="text-sm text-gray-400 font-exo">
+              Redirecting to your enhanced Imperial dashboard...
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Main Payment Form
   return (
     <div className="min-h-screen bg-sith-black relative">
       <StarField />

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, MapPin, Shield, Zap, Star, Crown, Swords, Moon, User, LogOut, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,7 +15,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { signOut } from '@/lib/supabase';
 import { getTopDestinations, searchDestinations, getDestinationsByRank } from '@/data/destinations';
 import { getUserTier } from '@/data/subscriptionTiers';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const Index = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -26,6 +26,22 @@ const Index = () => {
   
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Check for subscription success from payment portal
+  useEffect(() => {
+    if (location.state?.subscriptionSuccess) {
+      const { newRank, userName } = location.state;
+      
+      // Show success message with dramatic effect
+      setTimeout(() => {
+        toast.success(`Welcome to your new rank, ${newRank} ${userName}! Your power has increased significantly.`);
+      }, 1000);
+
+      // Clear the state to prevent repeated messages
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const userRank = user?.user_metadata?.rank || 'Acolyte';
   const userTier = getUserTier(userRank);
@@ -86,6 +102,10 @@ const Index = () => {
         toast.error('Failed to sign out');
         return;
       }
+      
+      // Clear local subscription data
+      localStorage.removeItem('sith-subscription');
+      
       toast.success('May the Force be with you on your next journey');
     } catch (error) {
       toast.error('An unexpected error occurred');
@@ -225,12 +245,17 @@ const Index = () => {
           
           {user && (
             <div className="mb-6">
-              <Badge className="bg-sith-red text-white text-lg px-4 py-2 font-syncopate">
+              <Badge className="bg-sith-red text-white text-lg px-4 py-2 font-syncopate animate-pulse-glow">
                 WELCOME, {userRank.toUpperCase()} {getUserDisplayName().toUpperCase()}
               </Badge>
               <p className="text-sm text-gray-400 mt-2 font-exo">
                 Access to {userTier.destinationLimit === 999 ? 'all' : userTier.destinationLimit} destinations
               </p>
+              {userRank !== 'Acolyte' && (
+                <p className="text-xs text-green-400 mt-1 font-exo animate-pulse">
+                  ✨ Enhanced powers active - Your rank grants special privileges
+                </p>
+              )}
             </div>
           )}
           
@@ -459,7 +484,7 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {['Acolyte', 'Inquisitor', 'Lord', 'Darth'].map((rank, index) => (
               <div key={index} className={`galaxy-card p-6 hover:sith-glow transition-all duration-300 group ${
-                userRank === rank ? 'ring-2 ring-sith-red' : ''
+                userRank === rank ? 'ring-2 ring-sith-red animate-pulse-glow' : ''
               }`}>
                 <div className="w-16 h-16 mx-auto mb-4 bg-sith-red/20 rounded-full flex items-center justify-center group-hover:animate-pulse-glow">
                   <Crown className="h-8 w-8 text-sith-red" />
@@ -472,7 +497,7 @@ const Index = () => {
                   {index + 1 === 4 && "Ultimate power and access"}
                 </p>
                 {userRank === rank && (
-                  <Badge className="bg-sith-red text-white mt-2 font-syncopate">CURRENT</Badge>
+                  <Badge className="bg-sith-red text-white mt-2 font-syncopate animate-pulse">CURRENT</Badge>
                 )}
               </div>
             ))}
