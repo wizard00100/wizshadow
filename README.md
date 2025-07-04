@@ -76,10 +76,13 @@ npm run dev
 ---
 ## 👥 Team Members
 
-Vishnuvarthan     – 
-Visweshwaran      – Backend & Database Setup
-Akhilesh Bharadhwaj – AI Integrations & Chatbot Logic
-Ajay Pokkali      - 
+**Vishnuvarthan**       –  [Github](https://github.com/Vishnuvarthan2006)
+**Visweshwaran**        –  [Github](https://github.com/vizarrd)
+
+**Akhilesh Bharadhwaj** –  [Github](https://github.com/Akhilesh4444)
+
+**Ajay Pokkali**        -  [Github](https://shadowportals.netlify.app/)
+
 ---
 
 
