@@ -52,11 +52,10 @@ This project blends immersive storytelling with real-world travel, targeting sci
 
 As part of the hackathon, we completed the following bounty challenges:
 
-### ⚔ Challenge 1: Choose Your Colour Theme
+## ⚔ Challenge 1: Choose Your Colour Theme
 We embraced the **Sith aesthetic** by implementing a **dark theme** with bold shades of **black and red** throughout the site — reflecting power, intensity, and rebellion.
 
 ## 🌀 Challenge 4: Bring Your World into 3D
-
 To add depth and immersion, we created a **greeting page with a 3D effect**. The main tab **tilts sideways in an anti-gravity motion** and smoothly returns to its normal position, giving the impression of dynamic motion and space distortion — a perfect match for the galactic theme.
 
 ---
