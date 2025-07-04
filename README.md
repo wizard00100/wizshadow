@@ -25,7 +25,7 @@ A sci-fi-themed room booking application where users can search and book rooms i
 - **Lovable** – Used for building components and deploying
 ---
 ## 🤖 Chosen Track 
-**FULL STACK**
+🖥️📦**FULL STACK**
 
 ---
 ## ❓ Problem Statement
