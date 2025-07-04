@@ -7,7 +7,8 @@ A sci-fi-themed room booking application where users can search and book rooms i
 
 ## 🔗 Project Links
 
-- 🌐 **Live Website**: [https://lovable.dev/projects/1041ff2f-ae47-49bc-8a0d-a4942df14def](https://lovable.dev/projects/1041ff2f-ae47-49bc-8a0d-a4942df14def)
+- 🌐 **Live Website**: [https://lovable.dev/projects/1041ff2f-ae47-49bc-8a0d-a4942df14def](https://shadowportals.netlify.app/)
+                       
 - 🎥 **Demo Video**: [YouTube Link Placeholder – Add your link here]
 
 
