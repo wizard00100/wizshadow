@@ -82,7 +82,7 @@ npm run dev
 
 **Akhilesh Bharadhwaj** –  [Github](https://github.com/Akhilesh4444)
 
-**Ajay Pokkali**        -  [Github](https://shadowportals.netlify.app/)](https://github.com/Ajaypokkali)
+**Ajay Pokkali**        -  [Github](https://github.com/Ajaypokkali)
 
 ---
 
