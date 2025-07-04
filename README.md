@@ -21,17 +21,43 @@ A sci-fi-themed room booking application where users can search and book rooms i
 - **Tailwind CSS** – Utility-first CSS framework for styling  
 - **shadcn/ui** – Accessible and reusable UI components
 - **Supabase** – For backend database storage
----
-## 🤖 Tools & AI Assistance
-
-This project was developed with the help of AI tools:
-
 - **BoltAI** – For generating UI layouts and flows
 - **Lovable** – Used for building components and deploying
-- **ChatGPT** – Assisted in project planning, logic explanation, and debugging content
+---
+## 🤖 Chosen Track 
+**FULL STACK **
+
+---
+## ❓ Problem Statement
+
+Traditional room booking platforms are functional but lack creativity and immersive engagement. This project explores on building a themed, interactive booking app — turning a routine task into a memorable experience for Star Wars fans.
+
+---
+## 💼 Business Model
+
+This project blends immersive storytelling with real-world travel, targeting sci-fi fans looking for unique stays. Here’s how it could grow into a sustainable and innovative business:
+
+1. **Immersive Travel Packages**  
+   Partner with local hotels to offer Star Wars-inspired room themes, complete with sound effects, props, and in-room AR/VR experiences for a premium fee.
+
+2. **Fan-Powered Reviews & Lore Unlocks**  
+   Users earn points by leaving themed reviews or booking frequently — points unlock bonus content (Star Wars trivia, fan art, easter eggs) and discounts.
+
+3. **Event-Based Bookings (Watch Parties & Conventions)**  
+   Collaborate with property owners to offer temporary themed stays during major Star Wars events (movie releases, Disney+ premieres, Comic-Cons).
 
 ---
 
+## 🏅 Completed Challenges
+
+As part of the hackathon, we completed the following bounty challenges:
+
+### ⚔ Challenge 1: Choose Your Colour Theme
+We embraced the **Sith aesthetic** by implementing a **dark theme** with bold shades of **black and red** throughout the site — reflecting power, intensity, and rebellion.
+
+### 🌀 Challenge 4: Bring Your World into 3D
+To add depth and immersion, we created a **greeting page with a 3D effect**. The main tab **tilts sideways in an anti-gravity motion** and smoothly returns to its normal position, giving the impression of dynamic motion and space distortion — a perfect match for the galactic theme.
+---
 ## 🌍 Deployment
 
 The project is deployed on **Netlify** for fast, reliable, and global hosting.  
