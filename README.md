@@ -1,4 +1,4 @@
-
+![image](https://github.com/user-attachments/assets/9137c216-2dc0-4f4f-9d4e-3ab36029ac82)
 # 🌌 ShadowPortals Room Booking Web App
 
 A sci-fi-themed room booking application where users can search and book rooms inspired by the Star Wars universe. Designed with a focus on simplicity and creativity, the app blends real-world room booking features with a galactic twist.
@@ -86,6 +86,29 @@ npm run dev
 
 ---
 ## 📸 Screenshots
+1.Press
+ ![image](https://github.com/user-attachments/assets/e0e142d5-d31b-48e3-8e91-87e54ee2862c)
+
+---
+2
+![image](https://github.com/user-attachments/assets/af34f008-840d-44df-9c2d-457c3a5ed15e)
+
+---
+3
+![image](https://github.com/user-attachments/assets/6efa126a-4b5e-4658-9354-f682cb6f5315)
+
+---
+4. Buy preimium higher Tier pass to access more locations and perks while booking
+   ![image](https://github.com/user-attachments/assets/f323140b-2055-49f0-bc82-471ad2d47b7b)
+   ![image](https://github.com/user-attachments/assets/6940738e-a700-4149-a697-10ab9450df60)
+
+---
+5. Use your Credit/Debit card, UPI for payment transactions
+![image](https://github.com/user-attachments/assets/a5ba9db8-8020-40db-af8e-8a6bd0078fa4)
+![image](https://github.com/user-attachments/assets/0f4673b9-c883-4179-84cc-eded72c541c3)
+
+
+---
 
 
 
