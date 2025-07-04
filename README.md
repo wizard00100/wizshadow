@@ -19,7 +19,8 @@ A sci-fi-themed room booking application where users can search and book rooms i
 - **TypeScript** – Strongly typed JavaScript for scalability  
 - **React** – UI library for building interactive components  
 - **Tailwind CSS** – Utility-first CSS framework for styling  
-- **shadcn/ui** – Accessible and reusable UI components  
+- **shadcn/ui** – Accessible and reusable UI components
+- **Supabase** – For backend database storage
 ---
 ## 🤖 Tools & AI Assistance
 
@@ -77,7 +78,7 @@ npm run dev
 
 Vishnuvarthan     – 
 Visweshwaran      – Backend & Database Setup
-Akhilesh Baradwaj – AI Integrations & Chatbot Logic
+Akhilesh Bharadhwaj – AI Integrations & Chatbot Logic
 Ajay Pokkali      - 
 ---
 
