@@ -87,15 +87,15 @@ npm run dev
 
 ---
 ## 📸 Screenshots
-1.Press
+1.Press the Join Empire
  ![image](https://github.com/user-attachments/assets/e0e142d5-d31b-48e3-8e91-87e54ee2862c)
 
 ---
-2
+2. Use only email to sign up and verify in order to sign in
 ![image](https://github.com/user-attachments/assets/af34f008-840d-44df-9c2d-457c3a5ed15e)
 
 ---
-3
+3.Search for available destination
 ![image](https://github.com/user-attachments/assets/6efa126a-4b5e-4658-9354-f682cb6f5315)
 
 ---
