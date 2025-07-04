@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/9137c216-2dc0-4f4f-9d4e-3ab36029ac82)
+
 # 🌌 ShadowPortals Room Booking Web App
 
 A sci-fi-themed room booking application where users can search and book rooms inspired by the Star Wars universe. Designed with a focus on simplicity and creativity, the app blends real-world room booking features with a galactic twist.
