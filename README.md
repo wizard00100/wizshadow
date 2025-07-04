@@ -75,12 +75,10 @@ npm run dev
 ---
 ## 👥 Team Members
 
-Venom P – UI/UX Design, Project Lead
-
-[Name] – Backend & Database Setup
-
-[Name] – AI Integrations & Chatbot Logic
-
+Vishnuvarthan     – 
+Visweshwaran      – Backend & Database Setup
+Akhilesh Baradwaj – AI Integrations & Chatbot Logic
+Ajay Pokkali      - 
 ---
 
 
