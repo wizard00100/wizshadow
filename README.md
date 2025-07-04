@@ -8,8 +8,9 @@ A sci-fi-themed room booking application where users can search and book rooms i
 ## 🔗 Project Links
 
 - 🌐 **Live Website**: [Shadow Portals](https://shadowportals.netlify.app/)
+- ** Please use this alternate link if previous link doesnt load** - https://shadow-portals.netlify.app/
                        
-- 🎥 **Demo Video**: [YouTube Link Placeholder – Add your link here]
+- 🎥 **Demo Video**: https://www.youtube.com/watch?v=_OmDF85jagQ&ab_channel=VisweshwaranK24BLC1211
 
 
 ---
@@ -21,17 +22,44 @@ A sci-fi-themed room booking application where users can search and book rooms i
 - **Tailwind CSS** – Utility-first CSS framework for styling  
 - **shadcn/ui** – Accessible and reusable UI components
 - **Supabase** – For backend database storage
----
-## 🤖 Tools & AI Assistance
-
-This project was developed with the help of AI tools:
-
 - **BoltAI** – For generating UI layouts and flows
 - **Lovable** – Used for building components and deploying
-- **ChatGPT** – Assisted in project planning, logic explanation, and debugging content
+---
+## 🤖 Chosen Track 
+🖥️📦**FULL STACK**
+
+---
+## ❓ Problem Statement
+
+Traditional room booking platforms are functional but lack creativity and immersive engagement. This project explores on building a themed, interactive booking app — turning a routine task into a memorable experience for Star Wars fans.
+
+---
+## 💼 Business Model
+
+This project blends immersive storytelling with real-world travel, targeting sci-fi fans looking for unique stays. Here’s how it could grow into a sustainable and innovative business:
+
+1. **Immersive Travel Packages**  
+   Partner with local hotels to offer Star Wars-inspired room themes, complete with sound effects, props, and in-room AR/VR experiences for a premium fee.
+
+2. **Fan-Powered Reviews & Lore Unlocks**  
+   Users earn points by leaving themed reviews or booking frequently — points unlock bonus content (Star Wars trivia, fan art, easter eggs) and discounts.
+
+3. **Event-Based Bookings (Watch Parties & Conventions)**  
+   Collaborate with property owners to offer temporary themed stays during major Star Wars events (movie releases, Disney+ premieres, Comic-Cons).
 
 ---
 
+## 🏅 Completed Challenges
+
+As part of the hackathon, we completed the following bounty challenges:
+
+## ⚔ Challenge 1: Choose Your Colour Theme
+We embraced the **Sith aesthetic** by implementing a **dark theme** with bold shades of **black and red** throughout the site — reflecting power, intensity, and rebellion.
+
+## 🌀 Challenge 4: Bring Your World into 3D
+To add depth and immersion, we created a **greeting page with a 3D effect**. The main tab **tilts sideways in an anti-gravity motion** and smoothly returns to its normal position, giving the impression of dynamic motion and space distortion — a perfect match for the galactic theme.
+
+---
 ## 🌍 Deployment
 
 The project is deployed on **Netlify** for fast, reliable, and global hosting.  
@@ -59,6 +87,29 @@ npm run dev
 
 ---
 ## 📸 Screenshots
+1.Press the Join Empire
+ ![image](https://github.com/user-attachments/assets/e0e142d5-d31b-48e3-8e91-87e54ee2862c)
+
+---
+2. Use only email to sign up and verify in order to sign in
+![image](https://github.com/user-attachments/assets/af34f008-840d-44df-9c2d-457c3a5ed15e)
+
+---
+3.Search for available destination
+![image](https://github.com/user-attachments/assets/6efa126a-4b5e-4658-9354-f682cb6f5315)
+
+---
+4. Buy preimium higher Tier pass to access more locations and perks while booking
+   ![image](https://github.com/user-attachments/assets/f323140b-2055-49f0-bc82-471ad2d47b7b)
+   ![image](https://github.com/user-attachments/assets/6940738e-a700-4149-a697-10ab9450df60)
+
+---
+5. Use your Credit/Debit card, UPI for payment transactions
+![image](https://github.com/user-attachments/assets/a5ba9db8-8020-40db-af8e-8a6bd0078fa4)
+![image](https://github.com/user-attachments/assets/0f4673b9-c883-4179-84cc-eded72c541c3)
+
+
+---
 
 
 
