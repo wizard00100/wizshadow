@@ -77,11 +77,12 @@ npm run dev
 ## 👥 Team Members
 
 **Vishnuvarthan**       –  [Github](https://github.com/Vishnuvarthan2006)
+
 **Visweshwaran**        –  [Github](https://github.com/vizarrd)
 
 **Akhilesh Bharadhwaj** –  [Github](https://github.com/Akhilesh4444)
 
-**Ajay Pokkali**        -  [Github](https://shadowportals.netlify.app/)
+**Ajay Pokkali**        -  [Github](https://shadowportals.netlify.app/)](https://github.com/Ajaypokkali)
 
 ---
 
