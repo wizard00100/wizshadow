@@ -8,6 +8,7 @@ A sci-fi-themed room booking application where users can search and book rooms i
 ## 🔗 Project Links
 
 - 🌐 **Live Website**: [Shadow Portals](https://shadowportals.netlify.app/)
+- ** Please use this alternate link if previous link doesnt load - https://shadow-portals.netlify.app/
                        
 - 🎥 **Demo Video**: https://www.youtube.com/watch?v=_OmDF85jagQ&ab_channel=VisweshwaranK24BLC1211
 
