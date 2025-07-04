@@ -1,46 +1,98 @@
-# Welcome to your Lovable project
 
-## Project info
+# 🌌 ShadowPortals Room Booking Web App
 
-**URL**: https://lovable.dev/projects/1041ff2f-ae47-49bc-8a0d-a4942df14def
+A sci-fi-themed room booking application where users can search and book rooms inspired by the Star Wars universe. Designed with a focus on simplicity and creativity, the app blends real-world room booking features with a galactic twist.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 🔗 Project Links
 
-**Use Lovable**
+- 🌐 **Live Website**: [https://lovable.dev/projects/1041ff2f-ae47-49bc-8a0d-a4942df14def](https://lovable.dev/projects/1041ff2f-ae47-49bc-8a0d-a4942df14def)
+- 🎥 **Demo Video**: [YouTube Link Placeholder – Add your link here]
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1041ff2f-ae47-49bc-8a0d-a4942df14def) and start prompting.
 
-Changes made via Lovable will be committed automatically to this repo.
+---
+## 🧰 Tech Stack
 
-**Use your preferred IDE**
+- **Vite** – Frontend build tool for lightning-fast development  
+- **TypeScript** – Strongly typed JavaScript for scalability  
+- **React** – UI library for building interactive components  
+- **Tailwind CSS** – Utility-first CSS framework for styling  
+- **shadcn/ui** – Accessible and reusable UI components  
+---
+## 🤖 Tools & AI Assistance
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+This project was developed with the help of AI tools:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- **BoltAI** – For generating UI layouts and flows
+- **Lovable** – Used for building components and deploying
+- **ChatGPT** – Assisted in project planning, logic explanation, and debugging content
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+## 🌍 Deployment
+
+The project is deployed on **Netlify** for fast, reliable, and global hosting.  
+
+
+---
+
+## ⚙️ Local Development Setup
+
+To run the project locally on your machine:
+
+```bash
+# 1. Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# 2. Navigate into the project directory
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
+# 3. Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 4. Start the development server
 npm run dev
 ```
+
+---
+## 📸 Screenshots
+
+
+
+
+---
+
+## ⭐ Features
+
+*Search and book Star Wars-themed rooms
+
+*Filter by price, location, and amenities
+
+*Stripe payment integration (optional / future)
+
+---
+## 👥 Team Members
+
+Venom P – UI/UX Design, Project Lead
+
+[Name] – Backend & Database Setup
+
+[Name] – AI Integrations & Chatbot Logic
+
+---
+
+
+
+
 
 **Edit a file directly in GitHub**
 
 - Navigate to the desired file(s).
 - Click the "Edit" button (pencil icon) at the top right of the file view.
 - Make your changes and commit the changes.
+  
+---
 
 **Use GitHub Codespaces**
 
@@ -50,24 +102,6 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
-## What technologies are used for this project?
+---  
 
-This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/1041ff2f-ae47-49bc-8a0d-a4942df14def) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
